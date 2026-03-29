@@ -1,17 +1,14 @@
 # SoloBase
 
-Персональный менеджер задач и заметок с фокусом на чистый UI и плавность работы.
+Персональный менеджер задач и заметок.
 
 ## Основные возможности
-- **Daily Tasks:** Список дел на день с привязкой ко времени.
-- **Eisenhower Matrix:** Приоритизация задач по методу TickTick.
-- **Notes & Tags:** Система заметок с цветовой кодировкой и фильтрацией.
-- **Personal Kanban:** Доски для управления проектами (Dev & Lifestyle).
-- **Cloud Sync:** Синхронизация данных через Firebase (в перспективе — миграция на Ktor).
+- **Задачи:** Ежедневное планирование и Матрица Эйзенхауэра.
+- **Заметки:** База знаний с системой цветных тегов.
+- **Канбан:** Личные доски для проектов.
+- **Синхронизация:** Firebase (планируется миграция на Ktor).
 
 ## Технологический стек
-- **UI:** Jetpack Compose (Material 3)
-- **Architecture:** Clean Architecture + MVVM
-- **DI:** Hilt
-- **Async:** Coroutines & Flow
-- **Database/Backend:** Firebase (Firestore + Auth)
+- Kotlin, Jetpack Compose (Material 3)
+- Hilt, Coroutines, Flow, Firebase
+- Clean Architecture
