@@ -1,0 +1,53 @@
+# --- СБОРКА И КЭШ ---
+.gradle/
+build/
+captures/
+.cxx/
+.externalNativeBuild/
+.kotlin/
+
+# --- ANDROID STUDIO / INTELLIJ ---
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries/
+.idea/libraries/
+.idea/caches/
+.idea/modules.xml
+.idea/navEditor.xml
+*.iml
+*.iws
+*.ipr
+
+# --- ОС (macOS / Windows / Linux) ---
+.DS_Store
+.directory
+Thumbs.db
+*.swp
+*~
+*.orig
+*.rej
+
+# --- СЕКРЕТЫ ---
+local.properties
+google-services.json
+GoogleService-Info.plist
+*.jks
+*.keystore
+*.p12
+*.key
+secrets.properties
+*signing.properties
+fabric.properties
+com_crashlytics_build_id.properties
+crashlytics.properties
+crashlytics-build.properties
+
+# --- АРТЕФАКТЫ ---
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+*.log
