@@ -10,7 +10,7 @@ data class Task (
 
     //Матрица Эйзенхаузера
     val isUrgent: Boolean = false,          // Срочная задача
-    val isImpotant: Boolean = false,       // Важная задача
+    val isImportant: Boolean = false,       // Важная задача
 
     // Поле для порядка (пригодится для Канбана и сортировки в списке)
     val timestamp: Long? = null,            // Время исполнения (для 1-го экрана)
