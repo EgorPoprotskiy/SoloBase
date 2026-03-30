@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.hilt.android)
     //✅Serialization
     alias(libs.plugins.kotlin.serialization)
+
 }
 
 android {
