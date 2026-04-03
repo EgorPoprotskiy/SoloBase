@@ -14,7 +14,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TaskViewModel @Inject constructor(
+class TaskViewModel
+@Inject constructor
+    (
     private val taskRepository: TaskRepository
 ): ViewModel() {
     private val _displayMode = MutableStateFlow(TasksDisplayMode.LIST)
