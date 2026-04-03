@@ -28,6 +28,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.egorpoprotskiy.solobase.domain.models.Task
+import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
+import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
 
 @Composable
 fun TaskItem(
@@ -86,9 +88,9 @@ fun TaskItem(
                     contentDescription = null,
                     // Используем error цвет, но делаем тусклым, если задача выполнена
                     tint = if (task.isCompleted) {
-                        MaterialTheme.colorScheme.error.copy(alpha = 0.5f)
+                        UrgentRed.copy(alpha = 0.5f)
                     } else {
-                        MaterialTheme.colorScheme.error
+                        UrgentRed
                     },
                     modifier = Modifier.size(20.dp)
                 )
@@ -99,9 +101,9 @@ fun TaskItem(
                     imageVector = Icons.Default.Star,
                     contentDescription = null,
                     tint = if (task.isCompleted) {
-                        Color(0xFFFFC107).copy(alpha = 0.5f)
+                        ImportantGold.copy(alpha = 0.5f)
                     } else {
-                        Color(0xFFFFC107)
+                        ImportantGold
                     },
                     modifier = Modifier.size(20.dp)
                 )
@@ -142,7 +144,7 @@ fun TaskItemDarkPreview() {
         timestamp = System.currentTimeMillis(),
         position = 1,
         tagId = null,
-        isCompleted = false,
+        isCompleted = true,
         projectId = null
     )
     MaterialTheme(colorScheme = darkColorScheme()) {

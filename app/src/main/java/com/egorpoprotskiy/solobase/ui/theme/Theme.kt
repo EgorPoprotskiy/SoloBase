@@ -25,8 +25,10 @@ private val DarkColorScheme = darkColorScheme(
     onPrimary = OnSurfaceWhite,
     onBackground = OnSurfaceWhite,
     onSurface = OnSurfaceWhite,
-    error = UrgentRed,
-    outlineVariant = OutlineDark
+//    error = UrgentRed,
+    outlineVariant = OutlineDark,
+    scrim = ImportantGold,
+    onPrimaryFixed = SecondaryGray
 )
 
 // Настройка СВЕТЛОЙ схемы
@@ -39,7 +41,9 @@ private val LightColorScheme = lightColorScheme(
     onBackground = OnSurfaceBlack,
     onSurface = OnSurfaceBlack,
     error = UrgentRed,
-    outlineVariant = OutlineLight
+    outlineVariant = OutlineLight,
+    scrim = ImportantGold,
+    onPrimaryFixed = SecondaryGray
 )
 
 @Composable

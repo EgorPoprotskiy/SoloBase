@@ -50,6 +50,11 @@ class TaskViewModel
             taskRepository.deleteTask(taskId)
         }
     }
+
+    //4. Метод клика по задаче
+    fun onTaskClicked(task: Task) {
+        // Логика навигации или открытия BottomSheet
+    }
 }
 
 enum class TasksDisplayMode {LIST, MATRIX}
