@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">SoloBase</string>
+    <string name="no_new_task">Нет задач. Добавьте новую задачу!</string>
+    <string name="add_new_task">Новая задача</string>
+    <string name="back_button">Назад</string>
+    <string name="add_title_label">Задача</string>
+    <string name="add_placeholder">введите текст</string>
+    <string name="add_description_task">Описание</string>
+    <string name="save_task">сохранить</string>
+    <string name="delete_task">удалить</string>
+    <string name="delete_confirmation_title">Подтверждение удаления</string>
+    <string name="delete_confirmation_message">Вы уверены, что хотите удалить задачу "%1$s"?</string>
+    <string name="delete_button">Удалить</string>
+    <string name="cancel_button">Отмена</string>
+    <string name="detail_task">Детали задачи</string>
+    <string name="edit_task">Редактировать задачу</string>
 </resources>
