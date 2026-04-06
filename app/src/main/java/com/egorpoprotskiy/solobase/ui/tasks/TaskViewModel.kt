@@ -33,7 +33,10 @@ class TaskViewModel
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
+            initialValue = listOf(
+                Task(id = "1", content = "База данных подключена", isUrgent = true),
+                Task(id = "2", content = "Hilt работает", isImportant = true)
+            )
         )
     // 2. Метод для изменения статуса задачи (выполнено/нет)
     fun onTaskChecked(task: Task, isCompleted: Boolean) {
