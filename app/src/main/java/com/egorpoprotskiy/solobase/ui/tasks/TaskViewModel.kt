@@ -58,6 +58,14 @@ class TaskViewModel
     fun onTaskClicked(task: Task) {
         // Логика навигации или открытия BottomSheet
     }
+
+    // Метод для добавления новой задачи
+    fun addTask(content: String) {
+        viewModelScope.launch {
+            val newTask = Task(content = content)
+            taskRepository.addTask(newTask)
+        }
+    }
 }
 
 enum class TasksDisplayMode {LIST, MATRIX}

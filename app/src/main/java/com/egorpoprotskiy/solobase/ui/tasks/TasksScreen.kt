@@ -122,6 +122,7 @@ fun TasksScreen(
                     TextButton(
                         onClick = {
                             if (taskText.isNotBlank()) {
+                                viewModel.addTask(taskText)
                                 // Тут позже вызовем метод ViewModel
                                 showDialog = false
                                 taskText = ""
