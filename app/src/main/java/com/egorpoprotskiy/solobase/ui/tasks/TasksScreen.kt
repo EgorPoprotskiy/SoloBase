@@ -51,7 +51,7 @@ fun TasksScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Мои задачи") },
+                title = { Text(stringResource(R.string.tasks_title)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -113,7 +113,7 @@ fun TasksScreen(
                     OutlinedTextField(
                         value = taskText,
                         onValueChange = { taskText = it}, // Обновляем состояние при наборе
-                        label = { Text("Что нужно сделать")},
+                        label = { Text(stringResource(R.string.task_input_label))},
 //                        modifier = Modifier.fillMaxSize(),
                         singleLine = false
                     )
@@ -122,6 +122,7 @@ fun TasksScreen(
                     TextButton(
                         onClick = {
                             if (taskText.isNotBlank()) {
+                                // Тут позже вызовем метод ViewModel
                                 showDialog = false
                                 taskText = ""
                             }
@@ -156,12 +157,12 @@ fun EmptyState(modifier: Modifier = Modifier) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = "Список пуст",
+                text = stringResource(R.string.tasks_empty_title),
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
-                text = "Добавьте свою первую задачу",
+                text = stringResource(R.string.tasks_empty_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

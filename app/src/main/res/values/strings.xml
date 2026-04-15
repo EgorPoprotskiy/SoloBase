@@ -14,4 +14,10 @@
     <string name="cancel_button">Отмена</string>
     <string name="detail_task">Детали задачи</string>
     <string name="edit_task">Редактировать задачу</string>
+    <string name="tasks_title">Мои задачи</string>
+    <string name="task_input_label">Что нужно сделать</string>
+    <string name="tasks_empty_title">Список пуст</string>
+    <string name="tasks_empty_subtitle">Добавьте свою первую задачу</string>
+    <string name="sample_task_db_connected">База данных подключена</string>
+    <string name="sample_task_hilt_works">Hilt работает</string>
 </resources>
