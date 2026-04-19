@@ -59,7 +59,7 @@ fun TaskItem(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp, horizontal = 4.dp)
+            .padding(vertical = 8.dp, horizontal = 16.dp)
             .clickable { onClick() },
         shape = MaterialTheme.shapes.medium, // Использует 16.dp из Shape.kt
         colors = CardDefaults.elevatedCardColors(

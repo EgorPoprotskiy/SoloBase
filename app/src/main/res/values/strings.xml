@@ -20,4 +20,5 @@
     <string name="tasks_empty_subtitle">Добавьте свою первую задачу</string>
     <string name="sample_task_db_connected">База данных подключена</string>
     <string name="sample_task_hilt_works">Hilt работает</string>
+    <string name="change_mode">Сменить режим</string>
 </resources>

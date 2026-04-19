@@ -6,15 +6,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -23,6 +27,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,21 +50,43 @@ fun TasksScreen(
     viewModel: TaskViewModel = hiltViewModel()
 ) {
     // Подписываемся на список задач
-    val tasks by viewModel.tasks.collectAsStateWithLifecycle()
+    val tasks by viewModel.tasks.collectAsStateWithLifecycle(initialValue = emptyList())
+    val displayMode by viewModel.displayMode.collectAsState()
     //переменная для диалогового окна создания новой задачи
     var showDialog by remember() { mutableStateOf(false) }
     var taskText by remember() { mutableStateOf("")}
     //Диалоговое окно на удаление задачи
     var showDeleteDialog by remember() { mutableStateOf(false)}
     var taskToDelete by remember() { mutableStateOf<Task?>(null)}
+    // Разделение экрана кнопкой на общий список задач и на матрицу
+    var isMatrixMode by remember { mutableStateOf(false) } // По умолчанию — обычный список
     // Базовая обертка для экрана
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.tasks_title)) },
+                actions = {
+                    // Кнопка переключения режимов
+                    IconButton(
+                        onClick = {
+                            viewModel.toggleDisplayMode()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (displayMode == TasksDisplayMode.LIST)
+                                Icons.Default.GridView else Icons.Default.List,
+                            contentDescription = stringResource(R.string.change_mode),
+                                    // Явно задаем размер, чтобы иконка не казалась мелкой
+                            modifier = Modifier.size(24.dp),
+                            // Используем onPrimary, так как фон шапки у нас SoloGreen (Primary)
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = MaterialTheme.colorScheme.primary, // Наш SoloGreen
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary // Контрастный белый/светлый
                 )
             )
         },
@@ -79,16 +106,25 @@ fun TasksScreen(
         }
     ) { paddingValues ->
         // Проверяем, есть ли задачи
-        if (tasks.isEmpty()) {
-            EmptyState(modifier = Modifier.padding(paddingValues))
+//        if (tasks.isEmpty()) {
+//            EmptyState(modifier = Modifier.padding(paddingValues))
+        if (displayMode == TasksDisplayMode.MATRIX) {
+            EisenhowerMatrix(
+                tasks = tasks,
+                // Вот решение твоей "красной" ошибки:
+                onTaskChecked = { task, isCompleted ->
+                    viewModel.onTaskChecked(task, isCompleted) // Проверь название метода во ViewModel!
+                },
+                modifier = Modifier.padding(paddingValues)
+            )
         } else {
             // Список задач
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+//                contentPadding = PaddingValues(16.dp),
+//                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(
                     items = tasks,
