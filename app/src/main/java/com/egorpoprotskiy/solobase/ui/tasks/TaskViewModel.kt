@@ -49,7 +49,6 @@ class TaskViewModel
     // 3. Метод для удаления
     fun deleteTask(taskId: String) {
         viewModelScope.launch {
-            // Тут repository.deleteTask(taskId)
             taskRepository.deleteTask(taskId)
         }
     }

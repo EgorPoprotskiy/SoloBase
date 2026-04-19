@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.egorpoprotskiy.solobase.R
+import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.ui.tasks.components.TaskItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,6 +48,9 @@ fun TasksScreen(
     //переменная для диалогового окна создания новой задачи
     var showDialog by remember() { mutableStateOf(false) }
     var taskText by remember() { mutableStateOf("")}
+    //Диалоговое окно на удаление задачи
+    var showDeleteDialog by remember() { mutableStateOf(false)}
+    var taskToDelete by remember() { mutableStateOf<Task?>(null)}
     // Базовая обертка для экрана
     Scaffold(
         topBar = {
@@ -96,7 +100,9 @@ fun TasksScreen(
 //                        viewModel.onTaskClicked(task)
                         },
                         onDeleteClick = {
-                            viewModel.deleteTask(task.id)
+                            showDeleteDialog = true
+                            taskToDelete = task
+//                            viewModel.deleteTask(task.id)
                         }
                     )
                 }
@@ -142,6 +148,51 @@ fun TasksScreen(
                         onClick = {
                             showDialog = false
                             taskText = ""
+                        }
+                    ) {
+                        Text(stringResource(R.string.cancel_button))
+                    }
+                }
+            )
+        }
+        //Диалоговое окно на удаление задачи
+        if (showDeleteDialog && taskToDelete != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    // Закрываем диалог при нажатии вне его или кнопки "Назад"
+                    showDeleteDialog = false
+                    taskToDelete = null
+                },
+                title = {
+                    Text(stringResource(R.string.delete_confirmation_title))
+                },
+                text = {
+                    Text(
+                        stringResource(
+                            R.string.delete_confirmation_message,
+                            taskToDelete!!.content
+                        )
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            // Тут вызовем метод ViewModel для удаления задачи
+                            viewModel.deleteTask(taskToDelete!!.id)
+                            showDeleteDialog = false
+                            taskToDelete = null
+                        }
+                    ) {
+                        Text(
+                            stringResource(R.string.delete_button),
+                            color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showDeleteDialog = false
+                            taskToDelete = null
                         }
                     ) {
                         Text(stringResource(R.string.cancel_button))
