@@ -2,11 +2,20 @@ package com.egorpoprotskiy.solobase.ui.tasks.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Delete
@@ -15,6 +24,8 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,12 +37,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.room.util.TableInfo
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
+import com.egorpoprotskiy.solobase.ui.theme.SoloBaseTheme
 import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
 
 @Composable
@@ -42,108 +56,87 @@ fun TaskItem(
     modifier: Modifier = Modifier,
     onDeleteClick: () -> Unit
 ) {
-    //Плавная анимация цвета текста
-    val textColor by animateColorAsState(
-        //Целевой цвет зависит от выполнения
-        targetValue = if (task.isCompleted) {
-            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f) // Тусклый
-        } else {
-            MaterialTheme.colorScheme.onSurface // Обычный
-        },
-        // Настройка анимации: 300мс, мягкое перетекание
-        animationSpec = tween(durationMillis = 300),
-        label = "TextColorAnimation"
-    )
-    Card(
+    ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp, horizontal = 8.dp)
+            .padding(vertical = 2.dp, horizontal = 4.dp)
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = MaterialTheme.shapes.medium, // Использует 16.dp из Shape.kt
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-//            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Checkbox(
                 checked = task.isCompleted,
-                onCheckedChange = onCheckedChange
+                onCheckedChange = onCheckedChange,
+                colors = CheckboxDefaults.colors(
+                    checkedColor = MaterialTheme.colorScheme.secondary, // Оранжевый
+                    uncheckedColor = MaterialTheme.colorScheme.outline
+                )
             )
+
             Text(
                 text = task.content,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    // Сохраняем перечеркивание
-                    textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null
-                ),
-                color = textColor,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 8.dp),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                    .padding(horizontal = 5.dp),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null
+                ),
+                color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                else MaterialTheme.colorScheme.onSurface
             )
-            // Срочно (Молния)
+
+            // --- БЛОК ИКОНОК-ИНДИКАТОРОВ ---
             if (task.isUrgent) {
                 Icon(
                     imageVector = Icons.Default.Bolt,
-                    contentDescription = null,
-                    // Используем error цвет, но делаем тусклым, если задача выполнена
-                    tint = if (task.isCompleted) {
-                        UrgentRed.copy(alpha = 0.5f)
-                    } else {
-                        UrgentRed
-                    },
-                    modifier = Modifier.size(20.dp)
+                    contentDescription = "Urgent",
+                    tint = if (task.isCompleted) UrgentRed.copy(alpha = 0.4f) else UrgentRed,
+                    modifier = Modifier.size(24.dp).padding(end = 4.dp)
                 )
             }
-            // Важно (Звезда)
+
             if (task.isImportant) {
                 Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = null,
-                    tint = if (task.isCompleted) {
-                        ImportantGold.copy(alpha = 0.5f)
-                    } else {
-                        ImportantGold
-                    },
-                    modifier = Modifier.size(20.dp)
+                    imageVector = Icons.Default.Star, // ВОТ ОНА! :)
+                    contentDescription = "Important",
+                    tint = if (task.isCompleted) ImportantGold.copy(alpha = 0.4f) else ImportantGold,
+                    modifier = Modifier.size(24.dp).padding(end = 4.dp)
                 )
             }
+            // ------------------------------
+
             IconButton(
                 onClick = onDeleteClick,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(32.dp)
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = null
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
     }
 }
 
+// ПРАВИЛЬНЫЕ ПРЕВЬЮ - теперь они не будут розовыми!
 @Preview(showBackground = true)
 @Composable
 fun TaskItemLightPreview() {
-    val task = Task(
-        content = "Пример задачи",
-        isUrgent = true,
-        isImportant = true,
-        timestamp = System.currentTimeMillis(),
-        position = 1,
-        tagId = null,
-        isCompleted = false,
-        projectId = null
-    )
-    MaterialTheme(colorScheme = lightColorScheme()) {
+    SoloBaseTheme(darkTheme = false) { // Используем твою тему!
         TaskItem(
-            task = task,
-            onCheckedChange = {},
-            onClick = {},
-            onDeleteClick = {}
+            task = Task(content = "Сделать крутой дизайн SoloBase", isUrgent = true, isImportant = true, isCompleted = false, timestamp = 0, position = 0),
+            onCheckedChange = {}, onClick = {}, onDeleteClick = {}
         )
     }
 }
@@ -151,22 +144,10 @@ fun TaskItemLightPreview() {
 @Preview(showBackground = true)
 @Composable
 fun TaskItemDarkPreview() {
-    val task = Task(
-        content = "Пример задачи",
-        isUrgent = true,
-        isImportant = true,
-        timestamp = System.currentTimeMillis(),
-        position = 1,
-        tagId = null,
-        isCompleted = true,
-        projectId = null
-    )
-    MaterialTheme(colorScheme = darkColorScheme()) {
+    SoloBaseTheme(darkTheme = true) { // Проверка темной темы
         TaskItem(
-            task = task,
-            onCheckedChange = {},
-            onClick = {},
-            onDeleteClick = {}
+            task = Task(content = "Выполненная задача", isUrgent = true, isImportant = true, isCompleted = true, timestamp = 0, position = 0),
+            onCheckedChange = {}, onClick = {}, onDeleteClick = {}
         )
     }
 }

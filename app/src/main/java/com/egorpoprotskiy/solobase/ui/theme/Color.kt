@@ -2,27 +2,21 @@ package com.egorpoprotskiy.solobase.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// --- ОСНОВНЫЕ АКЦЕНТЫ (Brand Colors) ---
-val PrimaryBlue = Color(0xFF3F8CFF)       // Яркий синий для кнопок и фокуса
-val PrimaryBlueLight = Color(0xFF005AC1)  // Насыщенный синий для светлой темы
-val SecondaryGray = Color(0xFF7E8494)     // Вспомогательный текст (подзаголовки)
+// --- SOLOBASE BRAND IDENTITY ---
+val SoloGreen = Color(0xFF374930)         // Темно-зеленый
+val SoloGreenLight = Color(0xFF4E6346)    // Светло-зеленый (для темной темы)
+val SoloOrange = Color(0xFFCA5731)        // Оранжевый акцент
 
-// --- ТЕМНАЯ ТЕМА (Dark Palette) ---
-val BackgroundDark = Color(0xFF121212)    // Глубокий серый (почти черный)
-val SurfaceDark = Color(0xFF1E1E1E)       // Цвет карточек и панелей
-val OnSurfaceWhite = Color(0xFFF5F5F5)    // Основной текст в темной теме
-val OutlineDark = Color(0xFF44474E)       // Разделители и границы
+// --- НЕЙТРАЛЬНЫЕ ЦВЕТА ---
+val BackgroundLight = Color(0xFFFDFCFB)   // Мягкий кремовый фон
+val BackgroundDark = Color(0xFF121212)    // Темный фон
+val SurfaceDark = Color(0xFF1E1E1E)       // Карточки в темной теме
+val OnSurfaceWhite = Color(0xFFF5F5F5)
+val OnSurfaceBlack = Color(0xFF1A1C1E)
 
-// --- СВЕТЛАЯ ТЕМА (Light Palette) ---
-val BackgroundLight = Color(0xFFF8F9FA)   // Светлый "дымчатый" фон (как в Google)
-val SurfaceLight = Color(0xFFFFFFFF)      // Белые карточки
-val OnSurfaceBlack = Color(0xFF1A1C1E)    // Глубокий черный текст
-val OutlineLight = Color(0xFFC4C6D0)      // Разделители в светлой теме
-
-// --- МАТРИЦА ЭЙЗЕНХАУЭРА (Eisenhower Accents) ---
-// Мы используем их для иконок молнии и звезды
-val UrgentRed = Color(0xFFFF5252)         // Срочно (Молния)
-val ImportantGold = Color(0xFFFFC107)     // Важно (Звезда)
+// --- ДОПОЛНИТЕЛЬНЫЕ (Эйзенхауэр) ---
+val UrgentRed = Color(0xFFFF5252)
+val ImportantGold = Color(0xFFFFC107)
 
 // --- ЦВЕТА ТЕГОВ (Tag Colors) ---
 // Пригодятся на 2-м экране для заметок и фильтров

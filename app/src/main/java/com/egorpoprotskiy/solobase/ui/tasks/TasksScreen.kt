@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -66,7 +67,9 @@ fun TasksScreen(
             FloatingActionButton(
                 onClick = {showDialog = true},
                 modifier = Modifier.padding(dimensionResource(R.dimen.padding_large)),
-                shape = MaterialTheme.shapes.medium
+                shape = MaterialTheme.shapes.large,
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
@@ -136,7 +139,10 @@ fun TasksScreen(
                                 showDialog = false
                                 taskText = ""
                             }
-                        }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary
+                        )
                     ) {
                         Text(
                             stringResource(R.string.add_new_task)
