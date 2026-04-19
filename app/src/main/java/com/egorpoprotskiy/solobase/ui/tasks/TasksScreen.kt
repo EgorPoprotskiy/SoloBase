@@ -94,6 +94,9 @@ fun TasksScreen(
                         },
                         onClick = {
 //                        viewModel.onTaskClicked(task)
+                        },
+                        onDeleteClick = {
+                            viewModel.deleteTask(task.id)
                         }
                     )
                 }

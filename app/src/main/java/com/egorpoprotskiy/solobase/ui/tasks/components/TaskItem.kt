@@ -9,11 +9,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
@@ -36,7 +39,8 @@ fun TaskItem(
     task: Task,
     onCheckedChange: (Boolean) -> Unit,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDeleteClick: () -> Unit
 ) {
     //Плавная анимация цвета текста
     val textColor by animateColorAsState(
@@ -108,6 +112,15 @@ fun TaskItem(
                     modifier = Modifier.size(20.dp)
                 )
             }
+            IconButton(
+                onClick = onDeleteClick,
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null
+                )
+            }
         }
     }
 }
@@ -129,7 +142,8 @@ fun TaskItemLightPreview() {
         TaskItem(
             task = task,
             onCheckedChange = {},
-            onClick = {}
+            onClick = {},
+            onDeleteClick = {}
         )
     }
 }
@@ -151,7 +165,8 @@ fun TaskItemDarkPreview() {
         TaskItem(
             task = task,
             onCheckedChange = {},
-            onClick = {}
+            onClick = {},
+            onDeleteClick = {}
         )
     }
 }
