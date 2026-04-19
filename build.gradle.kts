@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.kotlin.android) apply false
-    //✅KSP
+    //✅KSP (в том числе нужна для БД Room)
     alias(libs.plugins.ksp) apply false
     //✅Hilt
     alias(libs.plugins.hilt.android) apply false

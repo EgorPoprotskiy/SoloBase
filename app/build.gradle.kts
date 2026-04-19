@@ -99,4 +99,8 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     //✅ Библиотека для работы с шрифтами от Google
     implementation(libs.androidx.compose.ui.text.google.fonts)
+    //✅ Room (также должна быть зависимость KSP)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
 }

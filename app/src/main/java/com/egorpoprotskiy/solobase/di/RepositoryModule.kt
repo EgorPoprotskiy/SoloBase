@@ -1,6 +1,6 @@
 package com.egorpoprotskiy.solobase.di
 
-import com.egorpoprotskiy.solobase.data.TaskRepositoryImpl
+import com.egorpoprotskiy.solobase.data.repository.TaskRepositoryImpl
 import com.egorpoprotskiy.solobase.domain.repository.TaskRepository
 import dagger.Binds
 import dagger.Module
