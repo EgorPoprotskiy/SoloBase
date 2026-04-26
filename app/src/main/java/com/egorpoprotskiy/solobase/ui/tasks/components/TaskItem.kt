@@ -18,7 +18,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
 import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
@@ -59,7 +61,7 @@ fun TaskItem(
     ElevatedCard(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp, horizontal = 16.dp)
+            .padding(vertical = 6.dp, horizontal = 16.dp)
             .clickable { onClick() },
         shape = MaterialTheme.shapes.medium, // Использует 16.dp из Shape.kt
         colors = CardDefaults.elevatedCardColors(
@@ -70,23 +72,40 @@ fun TaskItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp),
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Checkbox(
-                checked = task.isCompleted,
-                onCheckedChange = onCheckedChange,
-                colors = CheckboxDefaults.colors(
-                    checkedColor = MaterialTheme.colorScheme.secondary, // Оранжевый
-                    uncheckedColor = MaterialTheme.colorScheme.outline
+//            Checkbox(
+//                checked = task.isCompleted,
+//                onCheckedChange = onCheckedChange,
+//                colors = CheckboxDefaults.colors(
+//                    checkedColor = MaterialTheme.colorScheme.secondary, // Оранжевый
+//                    uncheckedColor = MaterialTheme.colorScheme.outline
+//                )
+//            )
+            IconButton(
+                onClick = { onCheckedChange(!task.isCompleted) },
+                modifier = Modifier.size(32.dp) // Чуть больше зона клика для комфорта
+            ) {
+                Icon(
+                    imageVector = if (task.isCompleted)
+                        Icons.Filled.CheckCircle
+                    else
+                        Icons.Default.RadioButtonUnchecked,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = if (task.isCompleted)
+                        MaterialTheme.colorScheme.secondary
+                    else
+                        MaterialTheme.colorScheme.outline
                 )
-            )
+            }
 
             Text(
                 text = task.content,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(horizontal = 5.dp),
+                    .padding(horizontal = 8.dp),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null
                 ),
@@ -100,7 +119,7 @@ fun TaskItem(
                     imageVector = Icons.Default.Bolt,
                     contentDescription = "Urgent",
                     tint = if (task.isCompleted) UrgentRed.copy(alpha = 0.4f) else UrgentRed,
-                    modifier = Modifier.size(24.dp).padding(end = 4.dp)
+                    modifier = Modifier.size(22.dp).padding(end = 4.dp)
                 )
             }
 
@@ -109,7 +128,7 @@ fun TaskItem(
                     imageVector = Icons.Default.Star, // ВОТ ОНА! :)
                     contentDescription = "Important",
                     tint = if (task.isCompleted) ImportantGold.copy(alpha = 0.4f) else ImportantGold,
-                    modifier = Modifier.size(24.dp).padding(end = 4.dp)
+                    modifier = Modifier.size(22.dp).padding(end = 4.dp)
                 )
             }
             // ------------------------------
@@ -122,7 +141,7 @@ fun TaskItem(
                     imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }

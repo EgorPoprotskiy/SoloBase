@@ -1,7 +1,9 @@
 package com.egorpoprotskiy.solobase.ui.tasks
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +25,7 @@ import com.egorpoprotskiy.solobase.ui.tasks.components.TaskMiniItem
 import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
 import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun EisenhowerMatrix(
@@ -85,7 +88,7 @@ fun Quadrant(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(250.dp), // Фиксированная высота, чтобы сетка была ровной
+            .height(300.dp), // Фиксированная высота, чтобы сетка была ровной
         shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
             containerColor = color.copy(alpha = 0.05f) // Очень бледный фон в цвет заголовка
@@ -100,14 +103,19 @@ fun Quadrant(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 8.dp)
             )
-
-            LazyColumn {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(0.dp),
+            ) {
                 items(tasks) { task ->
                     TaskMiniItem(
                         task = task,
                         onCheckedChange = { onTaskChecked(task, it) }
                     )
                 }
+//                items(10) { index ->
+//                    Box(modifier = Modifier.fillMaxWidth().height(20.dp).background(if (index % 2 == 0) Color.Red else Color.Blue))
+//                }
             }
         }
     }

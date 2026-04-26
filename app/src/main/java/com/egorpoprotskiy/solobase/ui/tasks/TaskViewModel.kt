@@ -59,9 +59,18 @@ class TaskViewModel
     }
 
     // Метод для добавления новой задачи
-    fun addTask(content: String) {
+    fun addTask(content: String, isUrgent: Boolean = false, isImportant: Boolean = false) {
         viewModelScope.launch {
-            val newTask = Task(content = content)
+            val newTask = Task(
+                content = content,
+                isUrgent = isUrgent,
+                isImportant = isImportant,
+                // Ниже параметры, которые обычно есть в модели Task:
+                timestamp = System.currentTimeMillis(),
+                isCompleted = false,
+                position = 0 // или логика определения позиции
+            )
+//            taskRepository.addTask(newTask)
             taskRepository.addTask(newTask)
         }
     }

@@ -3,19 +3,27 @@ package com.egorpoprotskiy.solobase.ui.tasks
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,12 +44,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.egorpoprotskiy.solobase.R
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.ui.tasks.components.TaskItem
+import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
+import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +71,9 @@ fun TasksScreen(
     var taskToDelete by remember() { mutableStateOf<Task?>(null)}
     // Разделение экрана кнопкой на общий список задач и на матрицу
     var isMatrixMode by remember { mutableStateOf(false) } // По умолчанию — обычный список
+    // Отслеживание состояний isUrgent и isImportant
+    var isUrgent by remember { mutableStateOf(false) }
+    var isImportant by remember { mutableStateOf(false) }
     // Базовая обертка для экрана
     Scaffold(
         topBar = {
@@ -151,29 +165,64 @@ fun TasksScreen(
             AlertDialog(
                 onDismissRequest = {
                     showDialog = false
-                    taskText = ""},
-                title = {
-                    Text(
-                        stringResource(R.string.add_new_task))
-
+                    taskText = ""
+                    isUrgent = false // Сбрасываем при закрытии
+                    isImportant = false
                 },
+                title = { Text(stringResource(R.string.add_new_task))},
                 text = {
-                    OutlinedTextField(
-                        value = taskText,
-                        onValueChange = { taskText = it}, // Обновляем состояние при наборе
-                        label = { Text(stringResource(R.string.task_input_label))},
-//                        modifier = Modifier.fillMaxSize(),
-                        singleLine = false
-                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        OutlinedTextField(
+                            value = taskText,
+                            onValueChange = { taskText = it }, // Обновляем состояние при наборе
+                            label = { Text(stringResource(R.string.task_input_label)) },
+//                          modifier = Modifier.fillMaxSize(),
+                            singleLine = false
+                        )
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            maxItemsInEachRow = 2 // Ограничит по 2 кнопки в ряд, растягивая их
+                        ) {
+                            // Кнопка "Срочно"
+                            FilterChip(
+                                selected = isUrgent,
+                                onClick = { isUrgent = !isUrgent },
+                                label = { Text("Срочно", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                                leadingIcon = { Icon(Icons.Default.Bolt, null) },
+                                modifier = Modifier.weight(1f), // Занимает 50% ширины
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = UrgentRed.copy(alpha = 0.2f),
+                                    selectedLabelColor = UrgentRed,
+                                    selectedLeadingIconColor = UrgentRed
+                                )
+                            )
+                            // Кнопка "Важно"
+                            FilterChip(
+                                selected = isImportant,
+                                onClick = { isImportant = !isImportant },
+                                label = { Text("Важно", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
+                                leadingIcon = { Icon(Icons.Default.Star, null) },
+                                modifier = Modifier.weight(1f), // Занимает остальные 50%
+                                colors = FilterChipDefaults.filterChipColors(
+                                    selectedContainerColor = ImportantGold.copy(alpha = 0.2f),
+                                    selectedLabelColor = ImportantGold,
+                                    selectedLeadingIconColor = ImportantGold
+                                )
+                            )
+                        }
+                    }
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
                             if (taskText.isNotBlank()) {
-                                viewModel.addTask(taskText)
+                                viewModel.addTask(taskText, isUrgent, isImportant)
                                 // Тут позже вызовем метод ViewModel
                                 showDialog = false
                                 taskText = ""
+                                isUrgent = false
+                                isImportant = false
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -190,6 +239,8 @@ fun TasksScreen(
                         onClick = {
                             showDialog = false
                             taskText = ""
+                            isUrgent = false
+                            isImportant = false
                         }
                     ) {
                         Text(stringResource(R.string.cancel_button))
