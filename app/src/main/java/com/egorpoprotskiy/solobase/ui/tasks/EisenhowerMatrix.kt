@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 fun EisenhowerMatrix(
     tasks: List<Task>,
     onTaskChecked: (Task, Boolean) -> Unit,
+    onTaskLongClick: (Task) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyVerticalGrid(
@@ -45,7 +46,8 @@ fun EisenhowerMatrix(
                 title = "Срочно & Важно",
                 tasks = tasks.filter { it.isUrgent && it.isImportant },
                 color = UrgentRed,
-                onTaskChecked = onTaskChecked
+                onTaskChecked = onTaskChecked,
+                onTaskLongClick = onTaskLongClick
             )
         }
         // Квадрант 2: Важно, но не срочно
@@ -54,7 +56,8 @@ fun EisenhowerMatrix(
                 title = "Важно",
                 tasks = tasks.filter { !it.isUrgent && it.isImportant },
                 color = ImportantGold,
-                onTaskChecked = onTaskChecked
+                onTaskChecked = onTaskChecked,
+                onTaskLongClick = onTaskLongClick
             )
         }
         // Квадрант 3: Срочно, но не важно
@@ -63,7 +66,8 @@ fun EisenhowerMatrix(
                 title = "Срочно",
                 tasks = tasks.filter { it.isUrgent && !it.isImportant },
                 color = MaterialTheme.colorScheme.primary, // Твой SoloGreen
-                onTaskChecked = onTaskChecked
+                onTaskChecked = onTaskChecked,
+                onTaskLongClick = onTaskLongClick
             )
         }
         // Квадрант 4: Не срочно и не важно
@@ -72,7 +76,8 @@ fun EisenhowerMatrix(
                 title = "Прочее",
                 tasks = tasks.filter { !it.isUrgent && !it.isImportant },
                 color = MaterialTheme.colorScheme.outline,
-                onTaskChecked = onTaskChecked
+                onTaskChecked = onTaskChecked,
+                onTaskLongClick = onTaskLongClick
             )
         }
     }
@@ -83,7 +88,8 @@ fun Quadrant(
     title: String,
     tasks: List<Task>,
     color: androidx.compose.ui.graphics.Color,
-    onTaskChecked: (Task, Boolean) -> Unit
+    onTaskChecked: (Task, Boolean) -> Unit,
+    onTaskLongClick: (Task) -> Unit //колбэк на долгое нажатие для матрицы
 ) {
     Card(
         modifier = Modifier
@@ -110,7 +116,8 @@ fun Quadrant(
                 items(tasks) { task ->
                     TaskMiniItem(
                         task = task,
-                        onCheckedChange = { onTaskChecked(task, it) }
+                        onCheckedChange = { onTaskChecked(task, it) },
+                        onLongClick = {onTaskLongClick(task)} // Передаем задачу в колбек
                     )
                 }
 //                items(10) { index ->

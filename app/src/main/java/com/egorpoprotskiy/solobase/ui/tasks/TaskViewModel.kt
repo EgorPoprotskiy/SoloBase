@@ -2,6 +2,7 @@ package com.egorpoprotskiy.solobase.ui.tasks
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.domain.repository.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -72,6 +73,12 @@ class TaskViewModel
             )
 //            taskRepository.addTask(newTask)
             taskRepository.addTask(newTask)
+        }
+    }
+    //Обновление(редактирование) заметки
+    fun updateTask(task: Task) {
+        viewModelScope.launch {
+            taskRepository.updateTask(task)
         }
     }
 }

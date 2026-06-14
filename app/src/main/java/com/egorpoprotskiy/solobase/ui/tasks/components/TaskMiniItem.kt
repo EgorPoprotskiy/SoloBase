@@ -1,6 +1,8 @@
 package com.egorpoprotskiy.solobase.ui.tasks.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,17 +31,22 @@ import androidx.compose.ui.unit.sp
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.ui.theme.SoloBaseTheme
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskMiniItem(
     task: Task,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    onLongClick: () -> Unit, //Для долгого нажатия
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(28.dp) // Вот она, та самая высота как в тесте (чуть больше для удобства)
-            .clickable { onCheckedChange(!task.isCompleted) }
+            .combinedClickable(
+                onClick = { onCheckedChange(!task.isCompleted) },
+                onLongClick = onLongClick //Долгое нажатие
+            )
             .padding(horizontal = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -79,18 +86,23 @@ fun TaskMiniItem(
 @Composable
 fun MiniTaskPreview() {
     SoloBaseTheme {
-        Column(modifier = Modifier.padding(8.dp).width(180.dp)) {
+        Column(modifier = Modifier
+            .padding(8.dp)
+            .width(180.dp)) {
             TaskMiniItem(
                 task = Task(content = "Купить кофе", isImportant = true, timestamp = 0, position = 0),
-                onCheckedChange = {}
+                onCheckedChange = {},
+                onLongClick = {}
             )
             TaskMiniItem(
                 task = Task(content = "Позвонить маме", isCompleted = true, timestamp = 0, position = 0),
-                onCheckedChange = {}
+                onCheckedChange = {},
+                onLongClick = {}
             )
             TaskMiniItem(
                 task = Task(content = "Очень длинная задача, которая не влезет", timestamp = 0, position = 0),
-                onCheckedChange = {}
+                onCheckedChange = {},
+                onLongClick = {}
             )
         }
     }

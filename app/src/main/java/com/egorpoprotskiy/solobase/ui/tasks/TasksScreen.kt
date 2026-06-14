@@ -85,6 +85,8 @@ fun TasksScreen(
         animationSpec = spring(stiffness = Spring.StiffnessLow),
         label = "IconRotation"
     )
+    //Переменная для редактирования заметки(повторное открытие dialogAlert)
+    var editingTask by remember { mutableStateOf<Task?>(null) }
     // Базовая обертка для экрана
     Scaffold(
         topBar = {
@@ -150,6 +152,13 @@ fun TasksScreen(
                             isCompleted
                         ) // Проверь название метода во ViewModel!
                     },
+                    onTaskLongClick = { task ->
+                        editingTask = task
+                        taskText = task.content
+                        isUrgent = task.isUrgent
+                        isImportant = task.isImportant
+                        showDialog = true
+                    },
                     modifier = Modifier.padding(paddingValues)
                 )
             } else {
@@ -175,6 +184,11 @@ fun TasksScreen(
                                 viewModel.onTaskChecked(task, isChecked)
                             },
                             onClick = {
+                                editingTask = task //Запоминаем задачу
+                                taskText = task.content // Предзапоняем текст
+                                isUrgent = task.isUrgent // предзапоняем срочность
+                                isImportant = task.isImportant //Предзаполняем важность
+                                showDialog = true // Отерываем тот же самый диалог
 //                        viewModel.onTaskClicked(task)
                             },
                             onDeleteClick = {
@@ -191,11 +205,13 @@ fun TasksScreen(
             AlertDialog(
                 onDismissRequest = {
                     showDialog = false
+                    editingTask = null // очищаем после закрытия
                     taskText = ""
                     isUrgent = false // Сбрасываем при закрытии
                     isImportant = false
                 },
-                title = { Text(stringResource(R.string.add_new_task)) },
+                title = {
+                    Text(stringResource(R.string.save_task)) },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedTextField(
@@ -254,12 +270,23 @@ fun TasksScreen(
                     TextButton(
                         onClick = {
                             if (taskText.isNotBlank()) {
-                                viewModel.addTask(taskText, isUrgent, isImportant)
+                                if (editingTask == null) {
+                                    //Создать новую
+                                    viewModel.addTask(taskText, isUrgent, isImportant)
+                                } else {
+                                    //Редактировать существующую
+                                    viewModel.updateTask(editingTask!!.copy(
+                                        content = taskText,
+                                        isUrgent = isUrgent,
+                                        isImportant = isImportant
+                                    ))
+                                }
                                 // Тут позже вызовем метод ViewModel
                                 showDialog = false
+                                editingTask = null
                                 taskText = ""
-                                isUrgent = false
-                                isImportant = false
+//                                isUrgent = false
+//                                isImportant = false
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -267,7 +294,7 @@ fun TasksScreen(
                         )
                     ) {
                         Text(
-                            stringResource(R.string.add_new_task)
+                            stringResource(R.string.save_task)
                         )
                     }
                 },
