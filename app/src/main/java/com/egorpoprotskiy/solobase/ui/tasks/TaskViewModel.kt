@@ -6,6 +6,7 @@ import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.domain.usecase.task.AddTaskUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.DeleteTaskUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.GetTasksUseCase
+import com.egorpoprotskiy.solobase.domain.usecase.task.SetTaskCompletedUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.UpdateTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,8 @@ class TaskViewModel
     private val getTasksUseCase: GetTasksUseCase,
     private val addTaskUseCase: AddTaskUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
-    private val deleteTaskUseCase: DeleteTaskUseCase
+    private val deleteTaskUseCase: DeleteTaskUseCase,
+    private val setTaskCompletedUseCase: SetTaskCompletedUseCase
 ): ViewModel() {
     private val _displayMode = MutableStateFlow(TasksDisplayMode.LIST)
     val displayMode: StateFlow<TasksDisplayMode> = _displayMode.asStateFlow()
@@ -47,7 +49,7 @@ class TaskViewModel
     // 2. Метод для изменения статуса задачи (выполнено/нет)
     fun onTaskChecked(task: Task, isCompleted: Boolean) {
         viewModelScope.launch {
-            updateTaskUseCase(task.copy(isCompleted = isCompleted))
+            setTaskCompletedUseCase(task, isCompleted)
         }
     }
 
@@ -66,16 +68,7 @@ class TaskViewModel
     // Метод для добавления новой задачи
     fun addTask(content: String, isUrgent: Boolean = false, isImportant: Boolean = false) {
         viewModelScope.launch {
-            val newTask = Task(
-                content = content,
-                isUrgent = isUrgent,
-                isImportant = isImportant,
-                // Ниже параметры, которые обычно есть в модели Task:
-                timestamp = System.currentTimeMillis(),
-                isCompleted = false,
-                position = 0 // или логика определения позиции
-            )
-            addTaskUseCase(newTask)
+            addTaskUseCase(content, isUrgent, isImportant)
         }
     }
     //Обновление(редактирование) заметки

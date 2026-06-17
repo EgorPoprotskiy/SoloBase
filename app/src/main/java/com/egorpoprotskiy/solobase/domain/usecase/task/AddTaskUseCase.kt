@@ -7,5 +7,19 @@ import javax.inject.Inject
 class AddTaskUseCase @Inject constructor(
     private val taskRepository: TaskRepository
 ) {
-    suspend operator fun invoke(task: Task) = taskRepository.addTask(task)
+    suspend operator fun invoke(
+        content: String,
+        isUrgent: Boolean = false,
+        isImportant: Boolean = false
+    ) {
+        val task = Task(
+            content = content,
+            isUrgent = isUrgent,
+            isImportant = isImportant,
+            timestamp = System.currentTimeMillis(),
+            isCompleted = false,
+            position = 0
+        )
+        taskRepository.addTask(task)
+    }
 }
