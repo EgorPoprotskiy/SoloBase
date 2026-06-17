@@ -2,9 +2,11 @@ package com.egorpoprotskiy.solobase.ui.tasks
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.egorpoprotskiy.solobase.domain.models.Task
-import com.egorpoprotskiy.solobase.domain.repository.TaskRepository
+import com.egorpoprotskiy.solobase.domain.usecase.task.AddTaskUseCase
+import com.egorpoprotskiy.solobase.domain.usecase.task.DeleteTaskUseCase
+import com.egorpoprotskiy.solobase.domain.usecase.task.GetTasksUseCase
+import com.egorpoprotskiy.solobase.domain.usecase.task.UpdateTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,7 +20,10 @@ import javax.inject.Inject
 class TaskViewModel
 @Inject constructor
     (
-    private val taskRepository: TaskRepository
+    private val getTasksUseCase: GetTasksUseCase,
+    private val addTaskUseCase: AddTaskUseCase,
+    private val updateTaskUseCase: UpdateTaskUseCase,
+    private val deleteTaskUseCase: DeleteTaskUseCase
 ): ViewModel() {
     private val _displayMode = MutableStateFlow(TasksDisplayMode.LIST)
     val displayMode: StateFlow<TasksDisplayMode> = _displayMode.asStateFlow()
@@ -29,8 +34,8 @@ class TaskViewModel
             TasksDisplayMode.LIST
         }
     }
-    // 1. Получаем задачи из репозитория и конвертируем в StateFlow
-    val tasks: StateFlow<List<Task>> = taskRepository.getTasks()
+    // 1. Получаем задачи и конвертируем в StateFlow
+    val tasks: StateFlow<List<Task>> = getTasksUseCase()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -42,15 +47,14 @@ class TaskViewModel
     // 2. Метод для изменения статуса задачи (выполнено/нет)
     fun onTaskChecked(task: Task, isCompleted: Boolean) {
         viewModelScope.launch {
-            // Тут нужно вызвать repository.updateTask(...)
-            taskRepository.updateTask(task.copy(isCompleted = isCompleted))
+            updateTaskUseCase(task.copy(isCompleted = isCompleted))
         }
     }
 
     // 3. Метод для удаления
     fun deleteTask(taskId: String) {
         viewModelScope.launch {
-            taskRepository.deleteTask(taskId)
+            deleteTaskUseCase(taskId)
         }
     }
 
@@ -71,14 +75,13 @@ class TaskViewModel
                 isCompleted = false,
                 position = 0 // или логика определения позиции
             )
-//            taskRepository.addTask(newTask)
-            taskRepository.addTask(newTask)
+            addTaskUseCase(newTask)
         }
     }
     //Обновление(редактирование) заметки
     fun updateTask(task: Task) {
         viewModelScope.launch {
-            taskRepository.updateTask(task)
+            updateTaskUseCase(task)
         }
     }
 }
