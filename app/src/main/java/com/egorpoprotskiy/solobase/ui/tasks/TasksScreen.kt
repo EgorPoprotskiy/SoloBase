@@ -274,11 +274,12 @@ fun TasksScreen(
                                     viewModel.addTask(taskText, isUrgent, isImportant)
                                 } else {
                                     //Редактировать существующую
-                                    viewModel.updateTask(editingTask!!.copy(
+                                    viewModel.updateTaskDetails(
+                                        task = editingTask!!,
                                         content = taskText,
                                         isUrgent = isUrgent,
                                         isImportant = isImportant
-                                    ))
+                                    )
                                 }
                                 // Тут позже вызовем метод ViewModel
                                 showDialog = false

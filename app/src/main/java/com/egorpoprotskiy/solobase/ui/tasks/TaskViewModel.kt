@@ -7,6 +7,7 @@ import com.egorpoprotskiy.solobase.domain.usecase.task.AddTaskUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.DeleteTaskUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.GetTasksUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.SetTaskCompletedUseCase
+import com.egorpoprotskiy.solobase.domain.usecase.task.UpdateTaskDetailsUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.UpdateTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +26,8 @@ class TaskViewModel
     private val addTaskUseCase: AddTaskUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val deleteTaskUseCase: DeleteTaskUseCase,
-    private val setTaskCompletedUseCase: SetTaskCompletedUseCase
+    private val setTaskCompletedUseCase: SetTaskCompletedUseCase,
+    private val updateTaskDetailsUseCase: UpdateTaskDetailsUseCase
 ): ViewModel() {
     private val _displayMode = MutableStateFlow(TasksDisplayMode.LIST)
     val displayMode: StateFlow<TasksDisplayMode> = _displayMode.asStateFlow()
@@ -75,6 +77,17 @@ class TaskViewModel
     fun updateTask(task: Task) {
         viewModelScope.launch {
             updateTaskUseCase(task)
+        }
+    }
+
+    fun updateTaskDetails(
+        task: Task,
+        content: String,
+        isUrgent: Boolean,
+        isImportant: Boolean
+    ) {
+        viewModelScope.launch {
+            updateTaskDetailsUseCase(task, content, isUrgent, isImportant)
         }
     }
 }
