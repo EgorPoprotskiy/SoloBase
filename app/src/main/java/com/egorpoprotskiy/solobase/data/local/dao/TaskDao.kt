@@ -6,21 +6,21 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
-import com.egorpoprotskiy.solobase.domain.models.Task
+import com.egorpoprotskiy.solobase.data.local.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TaskDao {
     // Получаем все задачи, отсортированные по времени (свежие сверху)
     @Query("SELECT * FROM tasks ORDER BY timestamp DESC")
-    fun getAllTasks(): Flow<List<Task>>
+    fun getAllTasks(): Flow<List<TaskEntity>>
     // Добавляем или заменяем (если ID совпал)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertTask(task: Task)
+    suspend fun insertTask(task: TaskEntity)
     @Update
-    suspend fun updateTask(task: Task)
+    suspend fun updateTask(task: TaskEntity)
     @Delete
-    suspend fun deleteTask(task: Task)
+    suspend fun deleteTask(task: TaskEntity)
     // Удобный метод для удаления по ID
     @Query("DELETE FROM tasks WHERE id = :taskId")
     suspend fun deleteTaskById(taskId: String)

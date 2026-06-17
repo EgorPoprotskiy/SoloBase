@@ -1,13 +1,8 @@
 package com.egorpoprotskiy.solobase.domain.models
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import java.util.UUID
 
-@Entity(tableName = "tasks")
 data class Task (
-    @PrimaryKey
-//        (autoGenerate = true) - убрать, потому что у меня id = string
     val id: String = UUID.randomUUID().toString(),
     val content: String,              // Заголовок
     val category: TaskCategory = TaskCategory.DAILY, // Тип (задача или элемент канбана)

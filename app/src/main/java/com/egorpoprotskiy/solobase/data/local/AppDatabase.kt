@@ -4,9 +4,9 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.egorpoprotskiy.solobase.data.local.dao.TaskDao
-import com.egorpoprotskiy.solobase.domain.models.Task
+import com.egorpoprotskiy.solobase.data.local.entity.TaskEntity
 
-@Database(entities = [Task::class], version = 1, exportSchema = false)
+@Database(entities = [TaskEntity::class], version = 1, exportSchema = false)
 @TypeConverters(TaskConverters::class) // Подключаем наши конвертеры для Enum
 abstract class AppDatabase: RoomDatabase() {
     abstract fun taskDao(): TaskDao
