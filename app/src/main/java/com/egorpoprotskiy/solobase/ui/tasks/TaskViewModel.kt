@@ -32,6 +32,7 @@ class TaskViewModel
 ): ViewModel() {
     private val _uiState = MutableStateFlow(TasksUiState())
     val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()
+    private var allTasks: List<Task> = emptyList()
 
     private val _uiEvent = MutableSharedFlow<TasksUiEvent>()
     val uiEvent: SharedFlow<TasksUiEvent> = _uiEvent.asSharedFlow()
@@ -44,8 +45,9 @@ class TaskViewModel
         viewModelScope.launch {
             try {
                 getTasksUseCase().collect { tasks ->
+                    allTasks = tasks
                     _uiState.value = _uiState.value.copy(
-                        tasks = tasks,
+                        tasks = filterTasks(tasks, _uiState.value.selectedFilter),
                         isLoading = false,
                         errorMessage = null
                     )
@@ -66,6 +68,13 @@ class TaskViewModel
             TasksDisplayMode.LIST
         }
         _uiState.value = _uiState.value.copy(displayMode = nextDisplayMode)
+    }
+
+    fun selectFilter(filter: TaskFilter) {
+        _uiState.value = _uiState.value.copy(
+            selectedFilter = filter,
+            tasks = filterTasks(allTasks, filter)
+        )
     }
 
     // 2. Метод для изменения статуса задачи (выполнено/нет)
@@ -142,6 +151,16 @@ class TaskViewModel
 
     private fun setError(exception: Exception) {
         _uiState.value = _uiState.value.copy(errorMessage = exception.message)
+    }
+
+    private fun filterTasks(tasks: List<Task>, filter: TaskFilter): List<Task> {
+        return when (filter) {
+            TaskFilter.ALL -> tasks
+            TaskFilter.ACTIVE -> tasks.filter { !it.isCompleted }
+            TaskFilter.COMPLETED -> tasks.filter { it.isCompleted }
+            TaskFilter.URGENT -> tasks.filter { it.isUrgent }
+            TaskFilter.IMPORTANT -> tasks.filter { it.isImportant }
+        }
     }
 
     private suspend fun handleOperationError(exception: Exception) {

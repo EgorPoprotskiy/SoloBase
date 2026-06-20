@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
@@ -46,6 +47,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.dimensionResource
@@ -70,6 +72,7 @@ fun TasksScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val tasks = uiState.tasks
     val displayMode = uiState.displayMode
+    val selectedFilter = uiState.selectedFilter
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { event ->
@@ -144,70 +147,94 @@ fun TasksScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        //Анимация переключения между списком задач и матрицей.
-        AnimatedContent(
-            targetState = displayMode,
-            label = "ModeAnimation",
-            transitionSpec = {
-                fadeIn(animationSpec = tween(400)) + scaleIn(initialScale = 0.92f) togetherWith
-                        fadeOut(animationSpec = tween(300))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                TaskFilter.entries.forEach { filter ->
+                    FilterChip(
+                        selected = selectedFilter == filter,
+                        onClick = { viewModel.selectFilter(filter) },
+                        label = { Text(filter.label) }
+                    )
+                }
             }
-        ) { targetMode ->
-            if (targetMode == TasksDisplayMode.MATRIX) {
-                EisenhowerMatrix(
-                    tasks = tasks,
-                    // Вот решение твоей "красной" ошибки:
-                    onTaskChecked = { task, isCompleted ->
-                        viewModel.onTaskChecked(
-                            task,
-                            isCompleted
-                        ) // Проверь название метода во ViewModel!
-                    },
-                    onTaskLongClick = { task ->
-                        editingTask = task
-                        taskText = task.content
-                        isUrgent = task.isUrgent
-                        isImportant = task.isImportant
-                        showDialog = true
-                    },
-                    modifier = Modifier.padding(paddingValues)
-                )
-            } else {
-                // Список задач
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                ) {
-                    items(
-                        items = tasks,
-                        key = { it.id } // Важно для оптимизации анимаций и прокрутки
-                    ) { task ->
-                        TaskItem(
-                            task = task,
-                            //анимация в списке(плавное добавление и удаление задачи)
-                            modifier = Modifier.animateItem(
-                                fadeInSpec = tween(300),
-                                fadeOutSpec = tween(300),
-                                placementSpec = spring(stiffness = Spring.StiffnessLow) // Плавное перемещение
-                            ),
-                            onCheckedChange = { isChecked ->
-                                viewModel.onTaskChecked(task, isChecked)
-                            },
-                            onClick = {
-                                editingTask = task //Запоминаем задачу
-                                taskText = task.content // Предзапоняем текст
-                                isUrgent = task.isUrgent // предзапоняем срочность
-                                isImportant = task.isImportant //Предзаполняем важность
-                                showDialog = true // Отерываем тот же самый диалог
+            //Анимация переключения между списком задач и матрицей.
+            AnimatedContent(
+                targetState = displayMode,
+                label = "ModeAnimation",
+                modifier = Modifier.weight(1f),
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(400)) + scaleIn(initialScale = 0.92f) togetherWith
+                            fadeOut(animationSpec = tween(300))
+                }
+            ) { targetMode ->
+                if (tasks.isEmpty()) {
+                    TasksEmptyState(
+                        isFiltered = selectedFilter != TaskFilter.ALL,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else if (targetMode == TasksDisplayMode.MATRIX) {
+                    EisenhowerMatrix(
+                        tasks = tasks,
+                        // Вот решение твоей "красной" ошибки:
+                        onTaskChecked = { task, isCompleted ->
+                            viewModel.onTaskChecked(
+                                task,
+                                isCompleted
+                            ) // Проверь название метода во ViewModel!
+                        },
+                        onTaskLongClick = { task ->
+                            editingTask = task
+                            taskText = task.content
+                            isUrgent = task.isUrgent
+                            isImportant = task.isImportant
+                            showDialog = true
+                        }
+                    )
+                } else {
+                    // Список задач
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(
+                            items = tasks,
+                            key = { it.id } // Важно для оптимизации анимаций и прокрутки
+                        ) { task ->
+                            TaskItem(
+                                task = task,
+                                //анимация в списке(плавное добавление и удаление задачи)
+                                modifier = Modifier.animateItem(
+                                    fadeInSpec = tween(300),
+                                    fadeOutSpec = tween(300),
+                                    placementSpec = spring(stiffness = Spring.StiffnessLow) // Плавное перемещение
+                                ),
+                                onCheckedChange = { isChecked ->
+                                    viewModel.onTaskChecked(task, isChecked)
+                                },
+                                onClick = {
+                                    editingTask = task //Запоминаем задачу
+                                    taskText = task.content // Предзапоняем текст
+                                    isUrgent = task.isUrgent // предзапоняем срочность
+                                    isImportant = task.isImportant //Предзаполняем важность
+                                    showDialog = true // Отерываем тот же самый диалог
 //                        viewModel.onTaskClicked(task)
-                            },
-                            onDeleteClick = {
-                                showDeleteDialog = true
-                                taskToDelete = task
+                                },
+                                onDeleteClick = {
+                                    showDeleteDialog = true
+                                    taskToDelete = task
 //                            viewModel.deleteTask(task.id)
-                            }
-                        )
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -368,6 +395,34 @@ fun TasksScreen(
                         Text(stringResource(R.string.cancel_button))
                     }
                 }
+            )
+        }
+    }
+}
+
+@Composable
+private fun TasksEmptyState(
+    isFiltered: Boolean,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = if (isFiltered) "Нет задач для выбранного фильтра" else stringResource(R.string.tasks_empty_title),
+                style = MaterialTheme.typography.titleMedium,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = if (isFiltered) "Выберите другой фильтр или добавьте новую задачу" else stringResource(R.string.tasks_empty_subtitle),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
             )
         }
     }
