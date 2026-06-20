@@ -11,10 +11,8 @@ import com.egorpoprotskiy.solobase.domain.usecase.task.UpdateTaskDetailsUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.UpdateTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,36 +27,62 @@ class TaskViewModel
     private val setTaskCompletedUseCase: SetTaskCompletedUseCase,
     private val updateTaskDetailsUseCase: UpdateTaskDetailsUseCase
 ): ViewModel() {
-    private val _displayMode = MutableStateFlow(TasksDisplayMode.LIST)
-    val displayMode: StateFlow<TasksDisplayMode> = _displayMode.asStateFlow()
+    private val _uiState = MutableStateFlow(TasksUiState())
+    val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()
+
+    init {
+        observeTasks()
+    }
+
+    private fun observeTasks() {
+        viewModelScope.launch {
+            try {
+                getTasksUseCase().collect { tasks ->
+                    _uiState.value = _uiState.value.copy(
+                        tasks = tasks,
+                        isLoading = false,
+                        errorMessage = null
+                    )
+                }
+            } catch (exception: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    errorMessage = exception.message
+                )
+            }
+        }
+    }
+
     fun toggleDisplayMode() {
-        _displayMode.value = if (_displayMode.value == TasksDisplayMode.LIST) {
+        val nextDisplayMode = if (_uiState.value.displayMode == TasksDisplayMode.LIST) {
             TasksDisplayMode.MATRIX
         } else {
             TasksDisplayMode.LIST
         }
+        _uiState.value = _uiState.value.copy(displayMode = nextDisplayMode)
     }
-    // 1. Получаем задачи и конвертируем в StateFlow
-    val tasks: StateFlow<List<Task>> = getTasksUseCase()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = listOf(
-                Task(id = "1", content = "База данных подключена", isUrgent = true),
-                Task(id = "2", content = "Hilt работает", isImportant = true)
-            )
-        )
+
     // 2. Метод для изменения статуса задачи (выполнено/нет)
     fun onTaskChecked(task: Task, isCompleted: Boolean) {
         viewModelScope.launch {
-            setTaskCompletedUseCase(task, isCompleted)
+            try {
+                setTaskCompletedUseCase(task, isCompleted)
+                clearError()
+            } catch (exception: Exception) {
+                setError(exception)
+            }
         }
     }
 
     // 3. Метод для удаления
     fun deleteTask(taskId: String) {
         viewModelScope.launch {
-            deleteTaskUseCase(taskId)
+            try {
+                deleteTaskUseCase(taskId)
+                clearError()
+            } catch (exception: Exception) {
+                setError(exception)
+            }
         }
     }
 
@@ -70,13 +94,23 @@ class TaskViewModel
     // Метод для добавления новой задачи
     fun addTask(content: String, isUrgent: Boolean = false, isImportant: Boolean = false) {
         viewModelScope.launch {
-            addTaskUseCase(content, isUrgent, isImportant)
+            try {
+                addTaskUseCase(content, isUrgent, isImportant)
+                clearError()
+            } catch (exception: Exception) {
+                setError(exception)
+            }
         }
     }
     //Обновление(редактирование) заметки
     fun updateTask(task: Task) {
         viewModelScope.launch {
-            updateTaskUseCase(task)
+            try {
+                updateTaskUseCase(task)
+                clearError()
+            } catch (exception: Exception) {
+                setError(exception)
+            }
         }
     }
 
@@ -87,8 +121,21 @@ class TaskViewModel
         isImportant: Boolean
     ) {
         viewModelScope.launch {
-            updateTaskDetailsUseCase(task, content, isUrgent, isImportant)
+            try {
+                updateTaskDetailsUseCase(task, content, isUrgent, isImportant)
+                clearError()
+            } catch (exception: Exception) {
+                setError(exception)
+            }
         }
+    }
+
+    private fun clearError() {
+        _uiState.value = _uiState.value.copy(errorMessage = null)
+    }
+
+    private fun setError(exception: Exception) {
+        _uiState.value = _uiState.value.copy(errorMessage = exception.message)
     }
 }
 

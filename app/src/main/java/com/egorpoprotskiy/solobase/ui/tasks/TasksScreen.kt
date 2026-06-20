@@ -39,7 +39,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,8 +64,9 @@ fun TasksScreen(
     viewModel: TaskViewModel = hiltViewModel()
 ) {
     // Подписываемся на список задач
-    val tasks by viewModel.tasks.collectAsStateWithLifecycle(initialValue = emptyList())
-    val displayMode by viewModel.displayMode.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val tasks = uiState.tasks
+    val displayMode = uiState.displayMode
     //переменная для диалогового окна создания новой задачи
     var showDialog by remember() { mutableStateOf(false) }
     var taskText by remember() { mutableStateOf("") }
