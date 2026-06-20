@@ -3,9 +3,11 @@ package com.egorpoprotskiy.solobase.ui.tasks
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.egorpoprotskiy.solobase.domain.models.Task
+import com.egorpoprotskiy.solobase.domain.models.TaskStatus
 import com.egorpoprotskiy.solobase.domain.usecase.task.AddTaskUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.DeleteTaskUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.GetTasksUseCase
+import com.egorpoprotskiy.solobase.domain.usecase.task.MoveTaskToStatusUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.SetTaskCompletedUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.UpdateTaskDetailsUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.UpdateTaskUseCase
@@ -28,7 +30,8 @@ class TaskViewModel
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val deleteTaskUseCase: DeleteTaskUseCase,
     private val setTaskCompletedUseCase: SetTaskCompletedUseCase,
-    private val updateTaskDetailsUseCase: UpdateTaskDetailsUseCase
+    private val updateTaskDetailsUseCase: UpdateTaskDetailsUseCase,
+    private val moveTaskToStatusUseCase: MoveTaskToStatusUseCase
 ): ViewModel() {
     private val _uiState = MutableStateFlow(TasksUiState())
     val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()
@@ -62,12 +65,16 @@ class TaskViewModel
     }
 
     fun toggleDisplayMode() {
-        val nextDisplayMode = if (_uiState.value.displayMode == TasksDisplayMode.LIST) {
-            TasksDisplayMode.MATRIX
-        } else {
-            TasksDisplayMode.LIST
+        val nextDisplayMode = when (_uiState.value.displayMode) {
+            TasksDisplayMode.LIST -> TasksDisplayMode.MATRIX
+            TasksDisplayMode.MATRIX -> TasksDisplayMode.KANBAN
+            TasksDisplayMode.KANBAN -> TasksDisplayMode.LIST
         }
         _uiState.value = _uiState.value.copy(displayMode = nextDisplayMode)
+    }
+
+    fun selectDisplayMode(displayMode: TasksDisplayMode) {
+        _uiState.value = _uiState.value.copy(displayMode = displayMode)
     }
 
     fun selectFilter(filter: TaskFilter) {
@@ -145,6 +152,17 @@ class TaskViewModel
         }
     }
 
+    fun moveTaskToStatus(task: Task, status: TaskStatus) {
+        viewModelScope.launch {
+            try {
+                moveTaskToStatusUseCase(task, status)
+                clearError()
+            } catch (exception: Exception) {
+                handleOperationError(exception)
+            }
+        }
+    }
+
     private fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
@@ -173,4 +191,8 @@ class TaskViewModel
     }
 }
 
-enum class TasksDisplayMode {LIST, MATRIX}
+enum class TasksDisplayMode(val label: String) {
+    LIST("Список"),
+    MATRIX("Матрица"),
+    KANBAN("Kanban")
+}

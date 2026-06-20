@@ -6,7 +6,7 @@ data class Task (
     val id: String = UUID.randomUUID().toString(),
     val content: String,              // Заголовок
     val category: TaskCategory = TaskCategory.DAILY, // Тип (задача или элемент канбана)
-    val status: String = "TODO",    // Для канбана: "BACKLOG", "IN_PROGRESS", "DONE"
+    val status: String = TaskStatus.TODO.name,    // Для канбана: "BACKLOG", "IN_PROGRESS", "DONE"
 
     //Матрица Эйзенхаузера
     val isUrgent: Boolean = false,          // Срочная задача
@@ -23,4 +23,11 @@ data class Task (
 enum class TaskCategory {
     DAILY,      // Ежедневная задача
     KANBAN      // Элемент канбана
+}
+
+enum class TaskStatus {
+    BACKLOG,
+    TODO,
+    IN_PROGRESS,
+    DONE
 }

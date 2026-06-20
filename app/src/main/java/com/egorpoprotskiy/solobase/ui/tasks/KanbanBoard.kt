@@ -1,0 +1,202 @@
+package com.egorpoprotskiy.solobase.ui.tasks
+
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.egorpoprotskiy.solobase.domain.models.Task
+import com.egorpoprotskiy.solobase.domain.models.TaskStatus
+import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
+import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
+
+@Composable
+fun KanbanBoard(
+    tasks: List<Task>,
+    onMoveTask: (Task, TaskStatus) -> Unit,
+    onTaskClick: (Task) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .horizontalScroll(rememberScrollState())
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        kanbanColumns.forEach { column ->
+            KanbanColumn(
+                column = column,
+                tasks = tasks
+                    .filter { it.status == column.status.name }
+                    .sortedWith(compareBy<Task> { it.position }.thenByDescending { it.timestamp }),
+                onMoveTask = onMoveTask,
+                onTaskClick = onTaskClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun KanbanColumn(
+    column: KanbanColumnInfo,
+    tasks: List<Task>,
+    onMoveTask: (Task, TaskStatus) -> Unit,
+    onTaskClick: (Task) -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .width(280.dp)
+            .fillMaxHeight(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "${column.title} (${tasks.size})",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(
+                    items = tasks,
+                    key = { it.id }
+                ) { task ->
+                    KanbanTaskCard(
+                        task = task,
+                        status = column.status,
+                        onMoveTask = onMoveTask,
+                        onTaskClick = onTaskClick
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun KanbanTaskCard(
+    task: Task,
+    status: TaskStatus,
+    onMoveTask: (Task, TaskStatus) -> Unit,
+    onTaskClick: (Task) -> Unit
+) {
+    Card(
+        onClick = { onTaskClick(task) },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = task.content,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    if (task.isUrgent) {
+                        Icon(
+                            imageVector = Icons.Default.Bolt,
+                            contentDescription = null,
+                            tint = UrgentRed,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    if (task.isImportant) {
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            tint = ImportantGold,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+                Row {
+                    IconButton(
+                        onClick = { previousStatus(status)?.let { onMoveTask(task, it) } },
+                        enabled = previousStatus(status) != null,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    IconButton(
+                        onClick = { nextStatus(status)?.let { onMoveTask(task, it) } },
+                        enabled = nextStatus(status) != null,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+private data class KanbanColumnInfo(
+    val status: TaskStatus,
+    val title: String
+)
+
+private val kanbanColumns = listOf(
+    KanbanColumnInfo(TaskStatus.BACKLOG, "Backlog"),
+    KanbanColumnInfo(TaskStatus.TODO, "To Do"),
+    KanbanColumnInfo(TaskStatus.IN_PROGRESS, "In Progress"),
+    KanbanColumnInfo(TaskStatus.DONE, "Done")
+)
+
+private fun previousStatus(status: TaskStatus): TaskStatus? {
+    val index = kanbanColumns.indexOfFirst { it.status == status }
+    return kanbanColumns.getOrNull(index - 1)?.status
+}
+
+private fun nextStatus(status: TaskStatus): TaskStatus? {
+    val index = kanbanColumns.indexOfFirst { it.status == status }
+    return kanbanColumns.getOrNull(index + 1)?.status
+}
