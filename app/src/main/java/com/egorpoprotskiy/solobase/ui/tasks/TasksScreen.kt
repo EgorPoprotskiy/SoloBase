@@ -34,11 +34,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,6 +70,14 @@ fun TasksScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val tasks = uiState.tasks
     val displayMode = uiState.displayMode
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(viewModel) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is TasksUiEvent.ShowSnackbar -> snackbarHostState.showSnackbar(event.message)
+            }
+        }
+    }
     //переменная для диалогового окна создания новой задачи
     var showDialog by remember() { mutableStateOf(false) }
     var taskText by remember() { mutableStateOf("") }
@@ -130,7 +141,8 @@ fun TasksScreen(
                     contentDescription = stringResource(R.string.add_new_task)
                 )
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         //Анимация переключения между списком задач и матрицей.
         AnimatedContent(

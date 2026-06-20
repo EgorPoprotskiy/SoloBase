@@ -10,8 +10,11 @@ import com.egorpoprotskiy.solobase.domain.usecase.task.SetTaskCompletedUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.UpdateTaskDetailsUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.UpdateTaskUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -29,6 +32,9 @@ class TaskViewModel
 ): ViewModel() {
     private val _uiState = MutableStateFlow(TasksUiState())
     val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()
+
+    private val _uiEvent = MutableSharedFlow<TasksUiEvent>()
+    val uiEvent: SharedFlow<TasksUiEvent> = _uiEvent.asSharedFlow()
 
     init {
         observeTasks()
@@ -69,7 +75,7 @@ class TaskViewModel
                 setTaskCompletedUseCase(task, isCompleted)
                 clearError()
             } catch (exception: Exception) {
-                setError(exception)
+                handleOperationError(exception)
             }
         }
     }
@@ -81,7 +87,7 @@ class TaskViewModel
                 deleteTaskUseCase(taskId)
                 clearError()
             } catch (exception: Exception) {
-                setError(exception)
+                handleOperationError(exception)
             }
         }
     }
@@ -98,7 +104,7 @@ class TaskViewModel
                 addTaskUseCase(content, isUrgent, isImportant)
                 clearError()
             } catch (exception: Exception) {
-                setError(exception)
+                handleOperationError(exception)
             }
         }
     }
@@ -109,7 +115,7 @@ class TaskViewModel
                 updateTaskUseCase(task)
                 clearError()
             } catch (exception: Exception) {
-                setError(exception)
+                handleOperationError(exception)
             }
         }
     }
@@ -125,7 +131,7 @@ class TaskViewModel
                 updateTaskDetailsUseCase(task, content, isUrgent, isImportant)
                 clearError()
             } catch (exception: Exception) {
-                setError(exception)
+                handleOperationError(exception)
             }
         }
     }
@@ -136,6 +142,15 @@ class TaskViewModel
 
     private fun setError(exception: Exception) {
         _uiState.value = _uiState.value.copy(errorMessage = exception.message)
+    }
+
+    private suspend fun handleOperationError(exception: Exception) {
+        setError(exception)
+        _uiEvent.emit(
+            TasksUiEvent.ShowSnackbar(
+                message = exception.message ?: "Unknown error"
+            )
+        )
     }
 }
 
