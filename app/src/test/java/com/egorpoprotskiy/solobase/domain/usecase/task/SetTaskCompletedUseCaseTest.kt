@@ -1,6 +1,7 @@
 package com.egorpoprotskiy.solobase.domain.usecase.task
 
 import com.egorpoprotskiy.solobase.domain.models.Task
+import com.egorpoprotskiy.solobase.domain.models.TaskStatus
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -31,6 +32,7 @@ class SetTaskCompletedUseCaseTest {
         assertEquals(123L, updatedTask.timestamp)
         assertEquals(4, updatedTask.position)
         assertTrue(updatedTask.isCompleted)
+        assertEquals(TaskStatus.DONE.name, updatedTask.status)
     }
 
     @Test
@@ -45,6 +47,8 @@ class SetTaskCompletedUseCaseTest {
 
         useCase(task, false)
 
-        assertFalse(repository.updatedTask!!.isCompleted)
+        val updatedTask = repository.updatedTask!!
+        assertFalse(updatedTask.isCompleted)
+        assertEquals(TaskStatus.TODO.name, updatedTask.status)
     }
 }
