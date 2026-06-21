@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.egorpoprotskiy.solobase.domain.models.Project
+import com.egorpoprotskiy.solobase.ui.notes.ProjectNotesScreen
 import com.egorpoprotskiy.solobase.ui.projects.ProjectsScreen
 import com.egorpoprotskiy.solobase.ui.tasks.TasksScreen
 
@@ -23,6 +24,7 @@ import com.egorpoprotskiy.solobase.ui.tasks.TasksScreen
 fun MainScreen() {
     var selectedSection by remember { mutableStateOf(MainSection.TASKS) }
     var selectedProject by remember { mutableStateOf<Project?>(null) }
+    var selectedProjectSection by remember { mutableStateOf(ProjectSection.TASKS) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -38,6 +40,7 @@ fun MainScreen() {
                         selectedSection = section
                         if (section == MainSection.TASKS) {
                             selectedProject = null
+                            selectedProjectSection = ProjectSection.TASKS
                         }
                     },
                     label = { Text(section.label) }
@@ -45,16 +48,42 @@ fun MainScreen() {
             }
         }
         when (selectedSection) {
-            MainSection.TASKS -> TasksScreen(
-                selectedProject = selectedProject,
-                onBackToProjects = {
-                    selectedProject = null
-                    selectedSection = MainSection.PROJECTS
+            MainSection.TASKS -> {
+                val project = selectedProject
+                if (project == null) {
+                    TasksScreen()
+                } else {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        ProjectSection.entries.forEach { section ->
+                            FilterChip(
+                                selected = selectedProjectSection == section,
+                                onClick = { selectedProjectSection = section },
+                                label = { Text(section.label) }
+                            )
+                        }
+                    }
+                    when (selectedProjectSection) {
+                        ProjectSection.TASKS -> TasksScreen(
+                            selectedProject = project,
+                            onBackToProjects = {
+                                selectedProject = null
+                                selectedProjectSection = ProjectSection.TASKS
+                                selectedSection = MainSection.PROJECTS
+                            }
+                        )
+                        ProjectSection.NOTES -> ProjectNotesScreen(project = project)
+                    }
                 }
-            )
+            }
             MainSection.PROJECTS -> ProjectsScreen(
                 onProjectClick = { project ->
                     selectedProject = project
+                    selectedProjectSection = ProjectSection.TASKS
                     selectedSection = MainSection.TASKS
                 }
             )
@@ -65,4 +94,9 @@ fun MainScreen() {
 private enum class MainSection(val label: String) {
     TASKS("Задачи"),
     PROJECTS("Проекты")
+}
+
+private enum class ProjectSection(val label: String) {
+    TASKS("Задачи"),
+    NOTES("Заметки")
 }

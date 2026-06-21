@@ -1,7 +1,9 @@
 package com.egorpoprotskiy.solobase.di
 
+import com.egorpoprotskiy.solobase.data.repository.NoteRepositoryImpl
 import com.egorpoprotskiy.solobase.data.repository.ProjectRepositoryImpl
 import com.egorpoprotskiy.solobase.data.repository.TaskRepositoryImpl
+import com.egorpoprotskiy.solobase.domain.repository.NoteRepository
 import com.egorpoprotskiy.solobase.domain.repository.ProjectRepository
 import com.egorpoprotskiy.solobase.domain.repository.TaskRepository
 import dagger.Binds
@@ -24,4 +26,10 @@ abstract class RepositoryModule {
     abstract fun bindProjectRepository(
         projectRepositoryImpl: ProjectRepositoryImpl
     ): ProjectRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindNoteRepository(
+        noteRepositoryImpl: NoteRepositoryImpl
+    ): NoteRepository
 }

@@ -3,6 +3,7 @@ package com.egorpoprotskiy.solobase.di
 import android.content.Context
 import androidx.room.Room
 import com.egorpoprotskiy.solobase.data.local.AppDatabase
+import com.egorpoprotskiy.solobase.data.local.dao.NoteDao
 import com.egorpoprotskiy.solobase.data.local.dao.ProjectDao
 import com.egorpoprotskiy.solobase.data.local.dao.TaskDao
 import dagger.Module
@@ -38,5 +39,11 @@ object DatabaseModule {
     @Singleton
     fun provideProjectDao(database: AppDatabase): ProjectDao {
         return database.projectDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideNoteDao(database: AppDatabase): NoteDao {
+        return database.noteDao()
     }
 }
