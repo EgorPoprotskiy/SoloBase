@@ -1,9 +1,9 @@
 package com.egorpoprotskiy.solobase.di
 
-import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.egorpoprotskiy.solobase.data.local.AppDatabase
+import com.egorpoprotskiy.solobase.data.local.dao.ProjectDao
 import com.egorpoprotskiy.solobase.data.local.dao.TaskDao
 import dagger.Module
 import dagger.Provides
@@ -24,11 +24,19 @@ object DatabaseModule {
             context,
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
-        ).build()
+        )
+            .fallbackToDestructiveMigration(dropAllTables = true)
+            .build()
     }
     @Provides
     @Singleton
     fun provideTaskDao(database: AppDatabase): TaskDao {
         return database.taskDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideProjectDao(database: AppDatabase): ProjectDao {
+        return database.projectDao()
     }
 }
