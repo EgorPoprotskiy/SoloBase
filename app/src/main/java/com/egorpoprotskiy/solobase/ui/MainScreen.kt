@@ -15,12 +15,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.ui.projects.ProjectsScreen
 import com.egorpoprotskiy.solobase.ui.tasks.TasksScreen
 
 @Composable
 fun MainScreen() {
     var selectedSection by remember { mutableStateOf(MainSection.TASKS) }
+    var selectedProject by remember { mutableStateOf<Project?>(null) }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Row(
@@ -32,14 +34,30 @@ fun MainScreen() {
             MainSection.entries.forEach { section ->
                 FilterChip(
                     selected = selectedSection == section,
-                    onClick = { selectedSection = section },
+                    onClick = {
+                        selectedSection = section
+                        if (section == MainSection.TASKS) {
+                            selectedProject = null
+                        }
+                    },
                     label = { Text(section.label) }
                 )
             }
         }
         when (selectedSection) {
-            MainSection.TASKS -> TasksScreen()
-            MainSection.PROJECTS -> ProjectsScreen()
+            MainSection.TASKS -> TasksScreen(
+                selectedProject = selectedProject,
+                onBackToProjects = {
+                    selectedProject = null
+                    selectedSection = MainSection.PROJECTS
+                }
+            )
+            MainSection.PROJECTS -> ProjectsScreen(
+                onProjectClick = { project ->
+                    selectedProject = project
+                    selectedSection = MainSection.TASKS
+                }
+            )
         }
     }
 }

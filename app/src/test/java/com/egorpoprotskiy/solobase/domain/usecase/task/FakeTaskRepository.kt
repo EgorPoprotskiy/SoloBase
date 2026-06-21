@@ -4,6 +4,7 @@ import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.domain.repository.TaskRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 
 class FakeTaskRepository : TaskRepository {
     val tasks = MutableStateFlow<List<Task>>(emptyList())
@@ -13,7 +14,11 @@ class FakeTaskRepository : TaskRepository {
 
     override fun getTasks(): Flow<List<Task>> = tasks
 
-    override fun getTasksByProject(projectId: String): Flow<List<Task>> = tasks
+    override fun getTasksByProject(projectId: String): Flow<List<Task>> {
+        return tasks.map { currentTasks ->
+            currentTasks.filter { it.projectId == projectId }
+        }
+    }
 
     override suspend fun getTaskById(id: String): Task? = tasks.value.firstOrNull { it.id == id }
 

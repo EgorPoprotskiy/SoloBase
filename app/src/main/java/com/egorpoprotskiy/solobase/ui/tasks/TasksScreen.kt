@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.GridView
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.egorpoprotskiy.solobase.R
+import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.ui.tasks.components.TaskItem
 import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
@@ -65,6 +67,8 @@ import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasksScreen(
+    selectedProject: Project? = null,
+    onBackToProjects: () -> Unit = {},
     // Получаем вьюмодель через Hilt
     viewModel: TaskViewModel = hiltViewModel()
 ) {
@@ -74,6 +78,11 @@ fun TasksScreen(
     val displayMode = uiState.displayMode
     val selectedFilter = uiState.selectedFilter
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(selectedProject?.id) {
+        viewModel.selectProject(selectedProject?.id)
+    }
+
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { event ->
             when (event) {
@@ -104,7 +113,19 @@ fun TasksScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.tasks_title)) },
+                title = {
+                    Text(selectedProject?.name ?: stringResource(R.string.tasks_title))
+                },
+                navigationIcon = {
+                    if (selectedProject != null) {
+                        IconButton(onClick = onBackToProjects) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                },
                 actions = {
                     // Кнопка переключения режимов
                     IconButton(

@@ -27,10 +27,12 @@ import com.egorpoprotskiy.solobase.domain.models.Project
 @Composable
 fun ProjectItem(
     project: Project,
+    onClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     ElevatedCard(
+        onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface

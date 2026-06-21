@@ -14,6 +14,13 @@ interface TaskDao {
     // Получаем все задачи, отсортированные по времени (свежие сверху)
     @Query("SELECT * FROM tasks ORDER BY timestamp DESC")
     fun getAllTasks(): Flow<List<TaskEntity>>
+
+    @Query("SELECT * FROM tasks WHERE projectId = :projectId ORDER BY timestamp DESC")
+    fun getTasksByProject(projectId: String): Flow<List<TaskEntity>>
+
+    @Query("SELECT * FROM tasks WHERE id = :id LIMIT 1")
+    suspend fun getTaskById(id: String): TaskEntity?
+
     // Добавляем или заменяем (если ID совпал)
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTask(task: TaskEntity)

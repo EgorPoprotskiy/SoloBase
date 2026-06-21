@@ -6,6 +6,7 @@ import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.domain.models.TaskStatus
 import com.egorpoprotskiy.solobase.domain.usecase.task.AddTaskUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.DeleteTaskUseCase
+import com.egorpoprotskiy.solobase.domain.usecase.task.GetTasksByProjectUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.GetTasksUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.MoveTaskToStatusUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.task.SetTaskCompletedUseCase
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,6 +28,7 @@ class TaskViewModel
 @Inject constructor
     (
     private val getTasksUseCase: GetTasksUseCase,
+    private val getTasksByProjectUseCase: GetTasksByProjectUseCase,
     private val addTaskUseCase: AddTaskUseCase,
     private val updateTaskUseCase: UpdateTaskUseCase,
     private val deleteTaskUseCase: DeleteTaskUseCase,
@@ -36,6 +39,7 @@ class TaskViewModel
     private val _uiState = MutableStateFlow(TasksUiState())
     val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()
     private var allTasks: List<Task> = emptyList()
+    private var observeTasksJob: Job? = null
 
     private val _uiEvent = MutableSharedFlow<TasksUiEvent>()
     val uiEvent: SharedFlow<TasksUiEvent> = _uiEvent.asSharedFlow()
@@ -44,10 +48,17 @@ class TaskViewModel
         observeTasks()
     }
 
-    private fun observeTasks() {
-        viewModelScope.launch {
+    private fun observeTasks(projectId: String? = _uiState.value.selectedProjectId) {
+        observeTasksJob?.cancel()
+        observeTasksJob = viewModelScope.launch {
             try {
-                getTasksUseCase().collect { tasks ->
+                _uiState.value = _uiState.value.copy(isLoading = true)
+                val tasksFlow = if (projectId == null) {
+                    getTasksUseCase()
+                } else {
+                    getTasksByProjectUseCase(projectId)
+                }
+                tasksFlow.collect { tasks ->
                     allTasks = tasks
                     _uiState.value = _uiState.value.copy(
                         tasks = filterTasks(tasks, _uiState.value.selectedFilter),
@@ -62,6 +73,16 @@ class TaskViewModel
                 )
             }
         }
+    }
+
+    fun selectProject(projectId: String?) {
+        if (_uiState.value.selectedProjectId == projectId) return
+        allTasks = emptyList()
+        _uiState.value = _uiState.value.copy(
+            selectedProjectId = projectId,
+            tasks = emptyList()
+        )
+        observeTasks(projectId)
     }
 
     fun toggleDisplayMode() {
@@ -117,7 +138,12 @@ class TaskViewModel
     fun addTask(content: String, isUrgent: Boolean = false, isImportant: Boolean = false) {
         viewModelScope.launch {
             try {
-                addTaskUseCase(content, isUrgent, isImportant)
+                addTaskUseCase(
+                    content = content,
+                    isUrgent = isUrgent,
+                    isImportant = isImportant,
+                    projectId = _uiState.value.selectedProjectId
+                )
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)

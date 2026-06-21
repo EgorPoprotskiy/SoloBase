@@ -35,11 +35,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.ui.projects.components.ProjectItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectsScreen(
+    onProjectClick: (Project) -> Unit = {},
     viewModel: ProjectViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -100,6 +102,7 @@ fun ProjectsScreen(
                 ) { project ->
                     ProjectItem(
                         project = project,
+                        onClick = { onProjectClick(project) },
                         onDeleteClick = { viewModel.deleteProject(project.id) }
                     )
                 }

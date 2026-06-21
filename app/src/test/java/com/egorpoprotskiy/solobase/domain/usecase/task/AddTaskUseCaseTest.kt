@@ -24,7 +24,21 @@ class AddTaskUseCaseTest {
         assertEquals(false, task.isImportant)
         assertFalse(task.isCompleted)
         assertEquals(0, task.position)
+        assertEquals(null, task.projectId)
         assertNotNull(task.timestamp)
         assertEquals(task, repository.tasks.value.single())
+    }
+
+    @Test
+    fun `invoke saves project id when provided`() = kotlinx.coroutines.runBlocking {
+        val repository = FakeTaskRepository()
+        val useCase = AddTaskUseCase(repository)
+
+        useCase(
+            content = "Project task",
+            projectId = "project-1"
+        )
+
+        assertEquals("project-1", repository.addedTask!!.projectId)
     }
 }

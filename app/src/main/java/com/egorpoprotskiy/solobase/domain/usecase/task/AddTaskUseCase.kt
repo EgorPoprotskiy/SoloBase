@@ -10,7 +10,8 @@ class AddTaskUseCase @Inject constructor(
     suspend operator fun invoke(
         content: String,
         isUrgent: Boolean = false,
-        isImportant: Boolean = false
+        isImportant: Boolean = false,
+        projectId: String? = null
     ) {
         val task = Task(
             content = content,
@@ -18,7 +19,8 @@ class AddTaskUseCase @Inject constructor(
             isImportant = isImportant,
             timestamp = System.currentTimeMillis(),
             isCompleted = false,
-            position = 0
+            position = 0,
+            projectId = projectId
         )
         taskRepository.addTask(task)
     }

@@ -6,6 +6,7 @@ data class TasksUiState(
     val tasks: List<Task> = emptyList(),
     val displayMode: TasksDisplayMode = TasksDisplayMode.LIST,
     val selectedFilter: TaskFilter = TaskFilter.ALL,
+    val selectedProjectId: String? = null,
     val isLoading: Boolean = true,
     val errorMessage: String? = null
 )
