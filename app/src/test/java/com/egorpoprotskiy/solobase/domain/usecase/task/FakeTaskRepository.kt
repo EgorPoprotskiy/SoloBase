@@ -12,7 +12,11 @@ class FakeTaskRepository : TaskRepository {
     var updatedTask: Task? = null
     var deletedTaskId: String? = null
 
-    override fun getTasks(): Flow<List<Task>> = tasks
+    override fun getTasks(): Flow<List<Task>> {
+        return tasks.map { currentTasks ->
+            currentTasks.filter { it.projectId == null }
+        }
+    }
 
     override fun getTasksByProject(projectId: String): Flow<List<Task>> {
         return tasks.map { currentTasks ->

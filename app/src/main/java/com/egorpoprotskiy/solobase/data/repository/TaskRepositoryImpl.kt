@@ -13,7 +13,7 @@ class TaskRepositoryImpl @Inject constructor(
     private val taskDao: TaskDao // Hilt сам подставит его сюда
 ) : TaskRepository {
 
-    override fun getTasks(): Flow<List<Task>> = taskDao.getAllTasks()
+    override fun getTasks(): Flow<List<Task>> = taskDao.getTasksWithoutProject()
         .map { tasks -> tasks.map { it.toDomain() } }
 
     override fun getTasksByProject(projectId: String): Flow<List<Task>> = taskDao

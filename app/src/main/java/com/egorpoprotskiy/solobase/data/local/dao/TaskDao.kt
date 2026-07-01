@@ -15,6 +15,9 @@ interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY timestamp DESC")
     fun getAllTasks(): Flow<List<TaskEntity>>
 
+    @Query("SELECT * FROM tasks WHERE projectId IS NULL ORDER BY timestamp DESC")
+    fun getTasksWithoutProject(): Flow<List<TaskEntity>>
+
     @Query("SELECT * FROM tasks WHERE projectId = :projectId ORDER BY timestamp DESC")
     fun getTasksByProject(projectId: String): Flow<List<TaskEntity>>
 
