@@ -76,6 +76,7 @@ import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
 fun TasksScreen(
     selectedProject: Project? = null,
     onBackToProjects: () -> Unit = {},
+    topAppBarWindowInsets: WindowInsets = WindowInsets.statusBars,
     // Получаем вьюмодель через Hilt
     viewModel: TaskViewModel = hiltViewModel()
 ) {
@@ -115,7 +116,7 @@ fun TasksScreen(
         contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             TopAppBar(
-                windowInsets = WindowInsets.statusBars,
+                windowInsets = topAppBarWindowInsets,
                 title = {
                     Text(
                         text = selectedProject?.name ?: stringResource(R.string.tasks_title),

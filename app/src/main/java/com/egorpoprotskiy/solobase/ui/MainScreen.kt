@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Folder
@@ -81,6 +83,7 @@ fun MainScreen() {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .windowInsetsPadding(WindowInsets.statusBars)
                                 .padding(horizontal = 16.dp, vertical = 4.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -100,13 +103,17 @@ fun MainScreen() {
                             when (selectedProjectSection) {
                                 ProjectSection.TASKS -> TasksScreen(
                                     selectedProject = project,
+                                    topAppBarWindowInsets = WindowInsets(0.dp),
                                     onBackToProjects = {
                                         selectedProject = null
                                         selectedProjectSection = ProjectSection.TASKS
                                         selectedSection = MainSection.PROJECTS
                                     }
                                 )
-                                ProjectSection.NOTES -> ProjectNotesScreen(project = project)
+                                ProjectSection.NOTES -> ProjectNotesScreen(
+                                    project = project,
+                                    topAppBarWindowInsets = WindowInsets(0.dp)
+                                )
                             }
                         }
                     }

@@ -45,6 +45,7 @@ import com.egorpoprotskiy.solobase.ui.notes.components.NoteItem
 @Composable
 fun ProjectNotesScreen(
     project: Project,
+    topAppBarWindowInsets: WindowInsets = WindowInsets.statusBars,
     viewModel: ProjectNotesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -69,7 +70,7 @@ fun ProjectNotesScreen(
         contentWindowInsets = WindowInsets(0.dp),
         topBar = {
             TopAppBar(
-                windowInsets = WindowInsets.statusBars,
+                windowInsets = topAppBarWindowInsets,
                 title = { Text("${project.name}: заметки") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
