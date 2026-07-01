@@ -43,4 +43,22 @@ class MoveTaskToStatusUseCaseTest {
         assertEquals(TaskStatus.IN_PROGRESS.name, updatedTask.status)
         assertFalse(updatedTask.isCompleted)
     }
+
+    @Test
+    fun `invoke updates status and keeps task not completed when moved between active columns`() = kotlinx.coroutines.runBlocking {
+        val repository = FakeTaskRepository()
+        val useCase = MoveTaskToStatusUseCase(repository)
+        val task = Task(
+            id = "task-id",
+            content = "Ship",
+            status = TaskStatus.TODO.name,
+            isCompleted = false
+        )
+
+        useCase(task, TaskStatus.IN_PROGRESS)
+
+        val updatedTask = repository.updatedTask!!
+        assertEquals(TaskStatus.IN_PROGRESS.name, updatedTask.status)
+        assertFalse(updatedTask.isCompleted)
+    }
 }
