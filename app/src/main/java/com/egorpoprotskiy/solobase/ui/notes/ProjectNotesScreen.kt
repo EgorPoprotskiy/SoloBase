@@ -12,10 +12,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -40,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.egorpoprotskiy.solobase.domain.models.Note
 import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.ui.notes.components.NoteItem
+import com.egorpoprotskiy.solobase.ui.tasks.SearchTextField
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,10 +53,12 @@ fun ProjectNotesScreen(
     viewModel: ProjectNotesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val searchQuery = uiState.searchQuery
     val snackbarHostState = remember { SnackbarHostState() }
     var showDialog by remember { mutableStateOf(false) }
     var noteText by remember { mutableStateOf("") }
     var editingNote by remember { mutableStateOf<Note?>(null) }
+    var searchMode by remember { mutableStateOf(false) }
 
     LaunchedEffect(project.id) {
         viewModel.selectProject(project.id)
@@ -73,7 +78,32 @@ fun ProjectNotesScreen(
             {
                 TopAppBar(
                     windowInsets = topAppBarWindowInsets,
-                    title = { Text("${project.name}: заметки") },
+                    title = {
+                        if (searchMode) {
+                            SearchTextField(
+                                value = searchQuery,
+                                onValueChange = viewModel::updateSearchQuery,
+                                placeholder = "Поиск заметок",
+                                onClose = {
+                                    searchMode = false
+                                    viewModel.updateSearchQuery("")
+                                }
+                            )
+                        } else {
+                            Text("${project.name}: заметки")
+                        }
+                    },
+                    actions = {
+                        if (!searchMode) {
+                            IconButton(onClick = { searchMode = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Поиск",
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
                         titleContentColor = MaterialTheme.colorScheme.onPrimary
@@ -97,33 +127,37 @@ fun ProjectNotesScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        if (uiState.notes.isEmpty()) {
-            NotesEmptyState(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(
-                    items = uiState.notes,
-                    key = { it.id }
-                ) { note ->
-                    NoteItem(
-                        note = note,
-                        onClick = {
-                            editingNote = note
-                            noteText = note.content
-                            showDialog = true
-                        },
-                        onDeleteClick = { viewModel.deleteNote(note.id) }
-                    )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            if (uiState.notes.isEmpty()) {
+                NotesEmptyState(
+                    isSearching = searchQuery.isNotBlank(),
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(
+                        items = uiState.notes,
+                        key = { it.id }
+                    ) { note ->
+                        NoteItem(
+                            note = note,
+                            onClick = {
+                                editingNote = note
+                                noteText = note.content
+                                showDialog = true
+                            },
+                            onDeleteClick = { viewModel.deleteNote(note.id) }
+                        )
+                    }
                 }
             }
         }
@@ -184,6 +218,7 @@ fun ProjectNotesScreen(
 
 @Composable
 private fun NotesEmptyState(
+    isSearching: Boolean,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -195,16 +230,18 @@ private fun NotesEmptyState(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Заметок пока нет",
+                text = if (isSearching) "Ничего не найдено" else "Заметок пока нет",
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
-            Text(
-                text = "Добавьте первую заметку проекта",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
+            if (!isSearching) {
+                Text(
+                    text = "Добавьте первую заметку проекта",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }

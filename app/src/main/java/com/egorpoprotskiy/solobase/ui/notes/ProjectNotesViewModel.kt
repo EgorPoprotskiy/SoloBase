@@ -32,13 +32,16 @@ class ProjectNotesViewModel @Inject constructor(
     val uiEvent: SharedFlow<ProjectNotesUiEvent> = _uiEvent.asSharedFlow()
 
     private var observeNotesJob: Job? = null
+    private var allNotes: List<Note> = emptyList()
 
     fun selectProject(projectId: String) {
         if (_uiState.value.projectId == projectId) return
         observeNotesJob?.cancel()
+        allNotes = emptyList()
         _uiState.value = _uiState.value.copy(
             projectId = projectId,
             notes = emptyList(),
+            searchQuery = "",
             isLoading = true,
             errorMessage = null
         )
@@ -49,8 +52,9 @@ class ProjectNotesViewModel @Inject constructor(
         observeNotesJob = viewModelScope.launch {
             try {
                 getNotesByProjectUseCase(projectId).collect { notes ->
+                    allNotes = notes
                     _uiState.value = _uiState.value.copy(
-                        notes = notes,
+                        notes = searchNotes(notes, _uiState.value.searchQuery),
                         isLoading = false,
                         errorMessage = null
                     )
@@ -101,6 +105,13 @@ class ProjectNotesViewModel @Inject constructor(
         }
     }
 
+    fun updateSearchQuery(query: String) {
+        _uiState.value = _uiState.value.copy(
+            searchQuery = query,
+            notes = searchNotes(allNotes, query)
+        )
+    }
+
     private fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
@@ -116,5 +127,16 @@ class ProjectNotesViewModel @Inject constructor(
                 message = exception.message ?: "Unknown error"
             )
         )
+    }
+
+    private fun searchNotes(notes: List<Note>, searchQuery: String): List<Note> {
+        val query = searchQuery.trim()
+        return if (query.isBlank()) {
+            notes
+        } else {
+            notes.filter { note ->
+                note.content.contains(query, ignoreCase = true)
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ data class TasksUiState(
     val displayMode: TasksDisplayMode = TasksDisplayMode.LIST,
     val selectedFilter: TaskFilter = TaskFilter.ALL,
     val selectedProjectId: String? = null,
+    val searchQuery: String = "",
     val isLoading: Boolean = true,
     val errorMessage: String? = null
 )

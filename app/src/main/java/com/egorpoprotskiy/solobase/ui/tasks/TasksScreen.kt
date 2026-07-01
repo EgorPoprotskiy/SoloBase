@@ -24,10 +24,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -41,6 +43,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -56,8 +59,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -85,6 +90,7 @@ fun TasksScreen(
     val tasks = uiState.tasks
     val displayMode = uiState.displayMode
     val selectedFilter = uiState.selectedFilter
+    val searchQuery = uiState.searchQuery
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(selectedProject?.id) {
@@ -108,6 +114,7 @@ fun TasksScreen(
     var isUrgent by remember { mutableStateOf(false) }
     var isImportant by remember { mutableStateOf(false) }
     var controlsMenuExpanded by remember { mutableStateOf(false) }
+    var searchMode by remember { mutableStateOf(false) }
     //Переменная для редактирования заметки(повторное открытие dialogAlert)
     var editingTask by remember { mutableStateOf<Task?>(null) }
     // Базовая обертка для экрана
@@ -118,11 +125,23 @@ fun TasksScreen(
                 TopAppBar(
                     windowInsets = topAppBarWindowInsets,
                     title = {
-                        Text(
-                            text = selectedProject?.name ?: stringResource(R.string.tasks_title),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        if (searchMode) {
+                            SearchTextField(
+                                value = searchQuery,
+                                onValueChange = viewModel::updateSearchQuery,
+                                placeholder = "Поиск задач",
+                                onClose = {
+                                    searchMode = false
+                                    viewModel.updateSearchQuery("")
+                                }
+                            )
+                        } else {
+                            Text(
+                                text = selectedProject?.name ?: stringResource(R.string.tasks_title),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     },
                     navigationIcon = {
                         if (selectedProject != null) {
@@ -135,14 +154,23 @@ fun TasksScreen(
                         }
                     },
                     actions = {
-                        TasksControlsMenu(
-                            displayMode = displayMode,
-                            selectedFilter = selectedFilter,
-                            expanded = controlsMenuExpanded,
-                            onExpandedChange = { controlsMenuExpanded = it },
-                            onDisplayModeSelected = viewModel::selectDisplayMode,
-                            onFilterSelected = viewModel::selectFilter
-                        )
+                        if (!searchMode) {
+                            IconButton(onClick = { searchMode = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Поиск",
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                            TasksControlsMenu(
+                                displayMode = displayMode,
+                                selectedFilter = selectedFilter,
+                                expanded = controlsMenuExpanded,
+                                onExpandedChange = { controlsMenuExpanded = it },
+                                onDisplayModeSelected = viewModel::selectDisplayMode,
+                                onFilterSelected = viewModel::selectFilter
+                            )
+                        }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary, // Наш SoloGreen
@@ -201,6 +229,7 @@ fun TasksScreen(
                 if (tasks.isEmpty()) {
                     TasksEmptyState(
                         isFiltered = selectedFilter != TaskFilter.ALL,
+                        isSearching = searchQuery.isNotBlank(),
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
@@ -445,6 +474,7 @@ fun TasksScreen(
 @Composable
 private fun TasksEmptyState(
     isFiltered: Boolean,
+    isSearching: Boolean,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -456,16 +486,22 @@ private fun TasksEmptyState(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = if (isFiltered) "Нет задач для выбранного фильтра" else stringResource(R.string.tasks_empty_title),
+                text = when {
+                    isSearching -> "Ничего не найдено"
+                    isFiltered -> "Нет задач для выбранного фильтра"
+                    else -> stringResource(R.string.tasks_empty_title)
+                },
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
-            Text(
-                text = if (isFiltered) "Выберите другой фильтр или добавьте новую задачу" else stringResource(R.string.tasks_empty_subtitle),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
+            if (!isSearching) {
+                Text(
+                    text = if (isFiltered) "Выберите другой фильтр или добавьте новую задачу" else stringResource(R.string.tasks_empty_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
@@ -535,6 +571,58 @@ fun TasksControlsMenu(
             }
         }
     }
+}
+
+@Composable
+fun SearchTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    onClose: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val headerContentColor = MaterialTheme.colorScheme.onPrimary
+    val placeholderColor = headerContentColor.copy(alpha = 0.7f)
+
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth(),
+        textStyle = MaterialTheme.typography.titleMedium.copy(
+            color = headerContentColor,
+            fontWeight = FontWeight.Normal
+        ),
+        placeholder = {
+            Text(
+                text = placeholder,
+                color = placeholderColor,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Normal),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        },
+        singleLine = true,
+        trailingIcon = {
+            IconButton(onClick = onClose) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Закрыть поиск",
+                    tint = headerContentColor
+                )
+            }
+        },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedTextColor = headerContentColor,
+            unfocusedTextColor = headerContentColor,
+            cursorColor = headerContentColor,
+            focusedPlaceholderColor = placeholderColor,
+            unfocusedPlaceholderColor = placeholderColor,
+            focusedBorderColor = Color.Transparent,
+            unfocusedBorderColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent
+        )
+    )
 }
 
 private fun TasksDisplayMode.icon(): ImageVector {

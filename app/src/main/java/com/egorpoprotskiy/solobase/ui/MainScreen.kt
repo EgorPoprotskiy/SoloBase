@@ -14,6 +14,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,21 +36,26 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.egorpoprotskiy.solobase.domain.models.Project
+import com.egorpoprotskiy.solobase.ui.notes.ProjectNotesViewModel
 import com.egorpoprotskiy.solobase.ui.notes.ProjectNotesScreen
 import com.egorpoprotskiy.solobase.ui.projects.ProjectsScreen
+import com.egorpoprotskiy.solobase.ui.tasks.SearchTextField
 import com.egorpoprotskiy.solobase.ui.tasks.TaskViewModel
 import com.egorpoprotskiy.solobase.ui.tasks.TasksControlsMenu
 import com.egorpoprotskiy.solobase.ui.tasks.TasksScreen
 
 @Composable
 fun MainScreen(
-    taskViewModel: TaskViewModel = hiltViewModel()
+    taskViewModel: TaskViewModel = hiltViewModel(),
+    projectNotesViewModel: ProjectNotesViewModel = hiltViewModel()
 ) {
     var selectedSection by remember { mutableStateOf(MainSection.TASKS) }
     var selectedProject by remember { mutableStateOf<Project?>(null) }
     var selectedProjectSection by remember { mutableStateOf(ProjectSection.TASKS) }
     var projectControlsMenuExpanded by remember { mutableStateOf(false) }
+    var projectSearchMode by remember { mutableStateOf(false) }
     val taskUiState by taskViewModel.uiState.collectAsStateWithLifecycle()
+    val notesUiState by projectNotesViewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
@@ -100,15 +106,50 @@ fun MainScreen(
                             controlsMenuExpanded = projectControlsMenuExpanded,
                             displayMode = taskUiState.displayMode,
                             selectedFilter = taskUiState.selectedFilter,
+                            searchMode = projectSearchMode,
+                            searchQuery = if (selectedProjectSection == ProjectSection.TASKS) {
+                                taskUiState.searchQuery
+                            } else {
+                                notesUiState.searchQuery
+                            },
+                            searchPlaceholder = if (selectedProjectSection == ProjectSection.TASKS) {
+                                "Поиск задач"
+                            } else {
+                                "Поиск заметок"
+                            },
                             onBackClick = {
+                                taskViewModel.updateSearchQuery("")
+                                projectNotesViewModel.updateSearchQuery("")
+                                projectSearchMode = false
                                 selectedProject = null
                                 selectedProjectSection = ProjectSection.TASKS
                                 selectedSection = MainSection.PROJECTS
                             },
-                            onProjectSectionSelected = { selectedProjectSection = it },
+                            onProjectSectionSelected = {
+                                projectSearchMode = false
+                                taskViewModel.updateSearchQuery("")
+                                projectNotesViewModel.updateSearchQuery("")
+                                selectedProjectSection = it
+                            },
                             onControlsMenuExpandedChange = { projectControlsMenuExpanded = it },
                             onDisplayModeSelected = taskViewModel::selectDisplayMode,
-                            onFilterSelected = taskViewModel::selectFilter
+                            onFilterSelected = taskViewModel::selectFilter,
+                            onSearchClick = { projectSearchMode = true },
+                            onSearchQueryChange = {
+                                if (selectedProjectSection == ProjectSection.TASKS) {
+                                    taskViewModel.updateSearchQuery(it)
+                                } else {
+                                    projectNotesViewModel.updateSearchQuery(it)
+                                }
+                            },
+                            onCloseSearch = {
+                                projectSearchMode = false
+                                if (selectedProjectSection == ProjectSection.TASKS) {
+                                    taskViewModel.updateSearchQuery("")
+                                } else {
+                                    projectNotesViewModel.updateSearchQuery("")
+                                }
+                            }
                         )
                         Box(
                             modifier = Modifier
@@ -130,7 +171,8 @@ fun MainScreen(
                                 ProjectSection.NOTES -> ProjectNotesScreen(
                                     project = project,
                                     topAppBarWindowInsets = WindowInsets(0.dp),
-                                    showTopAppBar = false
+                                    showTopAppBar = false,
+                                    viewModel = projectNotesViewModel
                                 )
                             }
                         }
@@ -174,20 +216,35 @@ private fun ProjectHeader(
     controlsMenuExpanded: Boolean,
     displayMode: com.egorpoprotskiy.solobase.ui.tasks.TasksDisplayMode,
     selectedFilter: com.egorpoprotskiy.solobase.ui.tasks.TaskFilter,
+    searchMode: Boolean,
+    searchQuery: String,
+    searchPlaceholder: String,
     onBackClick: () -> Unit,
     onProjectSectionSelected: (ProjectSection) -> Unit,
     onControlsMenuExpandedChange: (Boolean) -> Unit,
     onDisplayModeSelected: (com.egorpoprotskiy.solobase.ui.tasks.TasksDisplayMode) -> Unit,
-    onFilterSelected: (com.egorpoprotskiy.solobase.ui.tasks.TaskFilter) -> Unit
+    onFilterSelected: (com.egorpoprotskiy.solobase.ui.tasks.TaskFilter) -> Unit,
+    onSearchClick: () -> Unit,
+    onSearchQueryChange: (String) -> Unit,
+    onCloseSearch: () -> Unit
 ) {
     TopAppBar(
         windowInsets = WindowInsets.statusBars,
         title = {
-            Text(
-                text = project.name,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            if (searchMode) {
+                SearchTextField(
+                    value = searchQuery,
+                    onValueChange = onSearchQueryChange,
+                    placeholder = searchPlaceholder,
+                    onClose = onCloseSearch
+                )
+            } else {
+                Text(
+                    text = project.name,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         },
         navigationIcon = {
             IconButton(onClick = onBackClick) {
@@ -198,36 +255,45 @@ private fun ProjectHeader(
             }
         },
         actions = {
-            IconButton(onClick = { onProjectSectionSelected(ProjectSection.TASKS) }) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.List,
-                    contentDescription = "Задачи",
-                    tint = if (selectedProjectSection == ProjectSection.TASKS) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.55f)
-                    }
+            if (!searchMode) {
+                IconButton(onClick = { onProjectSectionSelected(ProjectSection.TASKS) }) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.List,
+                        contentDescription = "Задачи",
+                        tint = if (selectedProjectSection == ProjectSection.TASKS) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.55f)
+                        }
+                    )
+                }
+                IconButton(onClick = { onProjectSectionSelected(ProjectSection.NOTES) }) {
+                    Icon(
+                        imageVector = Icons.Default.Description,
+                        contentDescription = "Заметки",
+                        tint = if (selectedProjectSection == ProjectSection.NOTES) {
+                            MaterialTheme.colorScheme.onPrimary
+                        } else {
+                            MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.55f)
+                        }
+                    )
+                }
+                IconButton(onClick = onSearchClick) {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Поиск",
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                TasksControlsMenu(
+                    displayMode = displayMode,
+                    selectedFilter = selectedFilter,
+                    expanded = controlsMenuExpanded,
+                    onExpandedChange = onControlsMenuExpandedChange,
+                    onDisplayModeSelected = onDisplayModeSelected,
+                    onFilterSelected = onFilterSelected
                 )
             }
-            IconButton(onClick = { onProjectSectionSelected(ProjectSection.NOTES) }) {
-                Icon(
-                    imageVector = Icons.Default.Description,
-                    contentDescription = "Заметки",
-                    tint = if (selectedProjectSection == ProjectSection.NOTES) {
-                        MaterialTheme.colorScheme.onPrimary
-                    } else {
-                        MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.55f)
-                    }
-                )
-            }
-            TasksControlsMenu(
-                displayMode = displayMode,
-                selectedFilter = selectedFilter,
-                expanded = controlsMenuExpanded,
-                onExpandedChange = onControlsMenuExpandedChange,
-                onDisplayModeSelected = onDisplayModeSelected,
-                onFilterSelected = onFilterSelected
-            )
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,

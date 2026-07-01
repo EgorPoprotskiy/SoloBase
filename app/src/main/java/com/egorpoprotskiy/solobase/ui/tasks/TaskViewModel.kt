@@ -61,7 +61,7 @@ class TaskViewModel
                 tasksFlow.collect { tasks ->
                     allTasks = tasks
                     _uiState.value = _uiState.value.copy(
-                        tasks = filterTasks(tasks, _uiState.value.selectedFilter),
+                        tasks = getVisibleTasks(tasks),
                         isLoading = false,
                         errorMessage = null
                     )
@@ -80,6 +80,7 @@ class TaskViewModel
         allTasks = emptyList()
         _uiState.value = _uiState.value.copy(
             selectedProjectId = projectId,
+            searchQuery = "",
             tasks = emptyList()
         )
         observeTasks(projectId)
@@ -101,7 +102,14 @@ class TaskViewModel
     fun selectFilter(filter: TaskFilter) {
         _uiState.value = _uiState.value.copy(
             selectedFilter = filter,
-            tasks = filterTasks(allTasks, filter)
+            tasks = getVisibleTasks(allTasks, filter, _uiState.value.searchQuery)
+        )
+    }
+
+    fun updateSearchQuery(query: String) {
+        _uiState.value = _uiState.value.copy(
+            searchQuery = query,
+            tasks = getVisibleTasks(allTasks, _uiState.value.selectedFilter, query)
         )
     }
 
@@ -204,6 +212,22 @@ class TaskViewModel
             TaskFilter.COMPLETED -> tasks.filter { it.isCompleted }
             TaskFilter.URGENT -> tasks.filter { it.isUrgent }
             TaskFilter.IMPORTANT -> tasks.filter { it.isImportant }
+        }
+    }
+
+    private fun getVisibleTasks(
+        tasks: List<Task>,
+        filter: TaskFilter = _uiState.value.selectedFilter,
+        searchQuery: String = _uiState.value.searchQuery
+    ): List<Task> {
+        val filteredTasks = filterTasks(tasks, filter)
+        val query = searchQuery.trim()
+        return if (query.isBlank()) {
+            filteredTasks
+        } else {
+            filteredTasks.filter { task ->
+                task.content.contains(query, ignoreCase = true)
+            }
         }
     }
 
