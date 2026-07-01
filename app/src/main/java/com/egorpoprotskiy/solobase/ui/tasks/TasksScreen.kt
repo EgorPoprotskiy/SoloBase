@@ -23,11 +23,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -40,7 +40,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -77,6 +76,7 @@ fun TasksScreen(
     selectedProject: Project? = null,
     onBackToProjects: () -> Unit = {},
     topAppBarWindowInsets: WindowInsets = WindowInsets.statusBars,
+    showTopAppBar: Boolean = true,
     // Получаем вьюмодель через Hilt
     viewModel: TaskViewModel = hiltViewModel()
 ) {
@@ -107,73 +107,52 @@ fun TasksScreen(
     // Отслеживание состояний isUrgent и isImportant
     var isUrgent by remember { mutableStateOf(false) }
     var isImportant by remember { mutableStateOf(false) }
-    var displayModeMenuExpanded by remember { mutableStateOf(false) }
-    var filterMenuExpanded by remember { mutableStateOf(false) }
+    var controlsMenuExpanded by remember { mutableStateOf(false) }
     //Переменная для редактирования заметки(повторное открытие dialogAlert)
     var editingTask by remember { mutableStateOf<Task?>(null) }
     // Базовая обертка для экрана
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
-        topBar = {
-            TopAppBar(
-                windowInsets = topAppBarWindowInsets,
-                title = {
-                    Text(
-                        text = selectedProject?.name ?: stringResource(R.string.tasks_title),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                navigationIcon = {
-                    if (selectedProject != null) {
-                        IconButton(onClick = onBackToProjects) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = null
-                            )
-                        }
-                    }
-                },
-                actions = {
-                    Box {
-                        TextButton(onClick = { displayModeMenuExpanded = true }) {
-                            Icon(
-                                imageVector = displayMode.icon(),
-                                contentDescription = "Текущий вид: ${displayMode.label}",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                            Text(
-                                text = "Вид: ${displayMode.label}",
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = stringResource(R.string.change_mode),
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = displayModeMenuExpanded,
-                            onDismissRequest = { displayModeMenuExpanded = false }
-                        ) {
-                            TasksDisplayMode.entries.forEach { mode ->
-                                DropdownMenuItem(
-                                    text = { Text(mode.label) },
-                                    onClick = {
-                                        viewModel.selectDisplayMode(mode)
-                                        displayModeMenuExpanded = false
-                                    }
+        topBar = if (showTopAppBar) {
+            {
+                TopAppBar(
+                    windowInsets = topAppBarWindowInsets,
+                    title = {
+                        Text(
+                            text = selectedProject?.name ?: stringResource(R.string.tasks_title),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    navigationIcon = {
+                        if (selectedProject != null) {
+                            IconButton(onClick = onBackToProjects) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = null
                                 )
                             }
                         }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary, // Наш SoloGreen
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary // Контрастный белый/светлый
+                    },
+                    actions = {
+                        TasksControlsMenu(
+                            displayMode = displayMode,
+                            selectedFilter = selectedFilter,
+                            expanded = controlsMenuExpanded,
+                            onExpandedChange = { controlsMenuExpanded = it },
+                            onDisplayModeSelected = viewModel::selectDisplayMode,
+                            onFilterSelected = viewModel::selectFilter
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary, // Наш SoloGreen
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                        actionIconContentColor = MaterialTheme.colorScheme.onPrimary // Контрастный белый/светлый
+                    )
                 )
-            )
+            }
+        } else {
+            {}
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -195,34 +174,18 @@ fun TasksScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                Box {
-                    OutlinedButton(onClick = { filterMenuExpanded = true }) {
-                        Text("Фильтр: ${selectedFilter.label}")
-                        Icon(
-                            imageVector = Icons.Default.ArrowDropDown,
-                            contentDescription = null
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = filterMenuExpanded,
-                        onDismissRequest = { filterMenuExpanded = false }
-                    ) {
-                        TaskFilter.entries.forEach { filter ->
-                            DropdownMenuItem(
-                                text = { Text(filter.label) },
-                                onClick = {
-                                    viewModel.selectFilter(filter)
-                                    filterMenuExpanded = false
-                                }
-                            )
-                        }
-                    }
+            if (selectedFilter != TaskFilter.ALL) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    FilterChip(
+                        selected = true,
+                        onClick = { viewModel.selectFilter(TaskFilter.ALL) },
+                        label = { Text("${selectedFilter.label} ×") }
+                    )
                 }
             }
             //Анимация переключения между списком задач и матрицей.
@@ -503,6 +466,73 @@ private fun TasksEmptyState(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
+        }
+    }
+}
+
+@Composable
+fun TasksControlsMenu(
+    displayMode: TasksDisplayMode,
+    selectedFilter: TaskFilter,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    onDisplayModeSelected: (TasksDisplayMode) -> Unit,
+    onFilterSelected: (TaskFilter) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier) {
+        IconButton(onClick = { onExpandedChange(true) }) {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "Настройки отображения",
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { onExpandedChange(false) }
+        ) {
+            Text(
+                text = "Вид",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            TasksDisplayMode.entries.forEach { mode ->
+                DropdownMenuItem(
+                    text = { Text(mode.label) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = mode.icon(),
+                            contentDescription = null
+                        )
+                    },
+                    onClick = {
+                        onDisplayModeSelected(mode)
+                        onExpandedChange(false)
+                    }
+                )
+            }
+            Text(
+                text = "Фильтр",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+            TaskFilter.entries.forEach { filter ->
+                DropdownMenuItem(
+                    text = { Text(filter.label) },
+                    onClick = {
+                        onFilterSelected(filter)
+                        onExpandedChange(false)
+                    },
+                    trailingIcon = {
+                        if (filter == selectedFilter) {
+                            Text("✓")
+                        }
+                    }
+                )
+            }
         }
     }
 }

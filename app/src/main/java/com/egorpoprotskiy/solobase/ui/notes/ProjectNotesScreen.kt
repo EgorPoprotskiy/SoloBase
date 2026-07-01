@@ -46,6 +46,7 @@ import com.egorpoprotskiy.solobase.ui.notes.components.NoteItem
 fun ProjectNotesScreen(
     project: Project,
     topAppBarWindowInsets: WindowInsets = WindowInsets.statusBars,
+    showTopAppBar: Boolean = true,
     viewModel: ProjectNotesViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -68,15 +69,19 @@ fun ProjectNotesScreen(
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
-        topBar = {
-            TopAppBar(
-                windowInsets = topAppBarWindowInsets,
-                title = { Text("${project.name}: заметки") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+        topBar = if (showTopAppBar) {
+            {
+                TopAppBar(
+                    windowInsets = topAppBarWindowInsets,
+                    title = { Text("${project.name}: заметки") },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimary
+                    )
                 )
-            )
+            }
+        } else {
+            {}
         },
         floatingActionButton = {
             FloatingActionButton(
