@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.egorpoprotskiy.solobase.domain.models.Project
+import com.egorpoprotskiy.solobase.ui.components.DeleteConfirmationDialog
 import com.egorpoprotskiy.solobase.ui.projects.components.ProjectItem
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,6 +53,7 @@ fun ProjectsScreen(
     var showDialog by remember { mutableStateOf(false) }
     var projectName by remember { mutableStateOf("") }
     var projectDescription by remember { mutableStateOf("") }
+    var projectToDelete by remember { mutableStateOf<Project?>(null) }
 
     LaunchedEffect(viewModel) {
         viewModel.uiEvent.collect { event ->
@@ -114,7 +116,7 @@ fun ProjectsScreen(
                     ProjectItem(
                         project = project,
                         onClick = { onProjectClick(project) },
-                        onDeleteClick = { viewModel.deleteProject(project.id) }
+                        onDeleteClick = { projectToDelete = project }
                     )
                 }
             }
@@ -173,6 +175,19 @@ fun ProjectsScreen(
                     ) {
                         Text("Отмена")
                     }
+                }
+            )
+        }
+
+        if (projectToDelete != null) {
+            DeleteConfirmationDialog(
+                title = "Удалить проект?",
+                onConfirm = {
+                    viewModel.deleteProject(projectToDelete!!.id)
+                    projectToDelete = null
+                },
+                onDismiss = {
+                    projectToDelete = null
                 }
             )
         }

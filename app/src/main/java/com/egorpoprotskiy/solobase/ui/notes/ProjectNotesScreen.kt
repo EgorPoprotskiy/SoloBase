@@ -41,6 +41,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.egorpoprotskiy.solobase.domain.models.Note
 import com.egorpoprotskiy.solobase.domain.models.Project
+import com.egorpoprotskiy.solobase.ui.components.DeleteConfirmationDialog
 import com.egorpoprotskiy.solobase.ui.notes.components.NoteItem
 import com.egorpoprotskiy.solobase.ui.tasks.SearchTextField
 
@@ -58,6 +59,7 @@ fun ProjectNotesScreen(
     var showDialog by remember { mutableStateOf(false) }
     var noteText by remember { mutableStateOf("") }
     var editingNote by remember { mutableStateOf<Note?>(null) }
+    var noteToDelete by remember { mutableStateOf<Note?>(null) }
     var searchMode by remember { mutableStateOf(false) }
 
     LaunchedEffect(project.id) {
@@ -155,7 +157,7 @@ fun ProjectNotesScreen(
                                 noteText = note.content
                                 showDialog = true
                             },
-                            onDeleteClick = { viewModel.deleteNote(note.id) }
+                            onDeleteClick = { noteToDelete = note }
                         )
                     }
                 }
@@ -210,6 +212,19 @@ fun ProjectNotesScreen(
                     ) {
                         Text("Отмена")
                     }
+                }
+            )
+        }
+
+        if (noteToDelete != null) {
+            DeleteConfirmationDialog(
+                title = "Удалить заметку?",
+                onConfirm = {
+                    viewModel.deleteNote(noteToDelete!!.id)
+                    noteToDelete = null
+                },
+                onDismiss = {
+                    noteToDelete = null
                 }
             )
         }

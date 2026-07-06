@@ -75,6 +75,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.egorpoprotskiy.solobase.R
 import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.domain.models.Task
+import com.egorpoprotskiy.solobase.ui.components.DeleteConfirmationDialog
 import com.egorpoprotskiy.solobase.ui.tasks.components.TaskItem
 import com.egorpoprotskiy.solobase.ui.tasks.components.formatReminderAt
 import com.egorpoprotskiy.solobase.ui.theme.TaskImportant
@@ -472,47 +473,16 @@ fun TasksScreen(
         }
         //Диалоговое окно на удаление задачи
         if (showDeleteDialog && taskToDelete != null) {
-            AlertDialog(
-                onDismissRequest = {
-                    // Закрываем диалог при нажатии вне его или кнопки "Назад"
+            DeleteConfirmationDialog(
+                title = "Удалить задачу?",
+                onConfirm = {
+                    viewModel.deleteTask(taskToDelete!!.id)
                     showDeleteDialog = false
                     taskToDelete = null
                 },
-                title = {
-                    Text(stringResource(R.string.delete_confirmation_title))
-                },
-                text = {
-                    Text(
-                        stringResource(
-                            R.string.delete_confirmation_message,
-                            taskToDelete!!.content
-                        )
-                    )
-                },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            // Тут вызовем метод ViewModel для удаления задачи
-                            viewModel.deleteTask(taskToDelete!!.id)
-                            showDeleteDialog = false
-                            taskToDelete = null
-                        }
-                    ) {
-                        Text(
-                            stringResource(R.string.delete_button),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                },
-                dismissButton = {
-                    TextButton(
-                        onClick = {
-                            showDeleteDialog = false
-                            taskToDelete = null
-                        }
-                    ) {
-                        Text(stringResource(R.string.cancel_button))
-                    }
+                onDismiss = {
+                    showDeleteDialog = false
+                    taskToDelete = null
                 }
             )
         }
