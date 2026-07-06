@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.domain.models.TaskStatus
+import com.egorpoprotskiy.solobase.ui.tasks.components.TaskReminderText
 import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
 import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
 
@@ -219,6 +220,10 @@ private fun KanbanTaskCard(
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 3,
                 overflow = TextOverflow.Ellipsis
+            )
+            TaskReminderText(
+                reminderAt = task.reminderAt,
+                isCompleted = task.isCompleted
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),

@@ -20,14 +20,16 @@ class UpdateTaskDetailsUseCaseTest {
             position = 2,
             isCompleted = true,
             projectId = "project-id",
-            tagId = "tag-id"
+            tagId = "tag-id",
+            reminderAt = 111L
         )
 
         useCase(
             task = task,
             content = "New content",
             isUrgent = true,
-            isImportant = true
+            isImportant = true,
+            reminderAt = 222L
         )
 
         val updatedTask = repository.updatedTask!!
@@ -40,6 +42,7 @@ class UpdateTaskDetailsUseCaseTest {
         assertTrue(updatedTask.isCompleted)
         assertEquals("project-id", updatedTask.projectId)
         assertEquals("tag-id", updatedTask.tagId)
+        assertEquals(222L, updatedTask.reminderAt)
     }
 
     @Test
@@ -56,11 +59,32 @@ class UpdateTaskDetailsUseCaseTest {
             task = task,
             content = "Task",
             isUrgent = false,
-            isImportant = false
+            isImportant = false,
+            reminderAt = null
         )
 
         val updatedTask = repository.updatedTask!!
         assertFalse(updatedTask.isUrgent)
         assertFalse(updatedTask.isImportant)
+    }
+
+    @Test
+    fun `invoke can clear reminder`() = kotlinx.coroutines.runBlocking {
+        val repository = FakeTaskRepository()
+        val useCase = UpdateTaskDetailsUseCase(repository)
+        val task = Task(
+            content = "Task",
+            reminderAt = 333L
+        )
+
+        useCase(
+            task = task,
+            content = "Task",
+            isUrgent = false,
+            isImportant = false,
+            reminderAt = null
+        )
+
+        assertEquals(null, repository.updatedTask!!.reminderAt)
     }
 }

@@ -11,13 +11,15 @@ class UpdateTaskDetailsUseCase @Inject constructor(
         task: Task,
         content: String,
         isUrgent: Boolean,
-        isImportant: Boolean
+        isImportant: Boolean,
+        reminderAt: Long?
     ) {
         taskRepository.updateTask(
             task.copy(
                 content = content,
                 isUrgent = isUrgent,
-                isImportant = isImportant
+                isImportant = isImportant,
+                reminderAt = reminderAt
             )
         )
     }

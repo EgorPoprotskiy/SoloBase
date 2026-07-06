@@ -101,17 +101,25 @@ fun TaskItem(
                 )
             }
 
-            Text(
-                text = task.content,
+            Column(
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 8.dp),
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null
-                ),
-                color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                else MaterialTheme.colorScheme.onSurface
-            )
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = task.content,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        textDecoration = if (task.isCompleted) TextDecoration.LineThrough else null
+                    ),
+                    color = if (task.isCompleted) MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    else MaterialTheme.colorScheme.onSurface
+                )
+                TaskReminderText(
+                    reminderAt = task.reminderAt,
+                    isCompleted = task.isCompleted
+                )
+            }
 
             // --- БЛОК ИКОНОК-ИНДИКАТОРОВ ---
             if (task.isUrgent) {

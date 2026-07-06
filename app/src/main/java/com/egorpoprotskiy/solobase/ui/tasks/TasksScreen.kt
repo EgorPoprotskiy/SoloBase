@@ -1,5 +1,8 @@
 package com.egorpoprotskiy.solobase.ui.tasks
 
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -61,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,8 +76,10 @@ import com.egorpoprotskiy.solobase.R
 import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.ui.tasks.components.TaskItem
+import com.egorpoprotskiy.solobase.ui.tasks.components.formatReminderAt
 import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
 import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,6 +98,7 @@ fun TasksScreen(
     val selectedFilter = uiState.selectedFilter
     val searchQuery = uiState.searchQuery
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     LaunchedEffect(selectedProject?.id) {
         viewModel.selectProject(selectedProject?.id)
@@ -113,6 +120,7 @@ fun TasksScreen(
     // Отслеживание состояний isUrgent и isImportant
     var isUrgent by remember { mutableStateOf(false) }
     var isImportant by remember { mutableStateOf(false) }
+    var reminderAt by remember { mutableStateOf<Long?>(null) }
     var controlsMenuExpanded by remember { mutableStateOf(false) }
     var searchMode by remember { mutableStateOf(false) }
     //Переменная для редактирования заметки(повторное открытие dialogAlert)
@@ -259,6 +267,7 @@ fun TasksScreen(
                                             taskText = task.content // Предзапоняем текст
                                             isUrgent = task.isUrgent // предзапоняем срочность
                                             isImportant = task.isImportant //Предзаполняем важность
+                                            reminderAt = task.reminderAt
                                             showDialog = true // Отерываем тот же самый диалог
 //                        viewModel.onTaskClicked(task)
                                         },
@@ -286,6 +295,7 @@ fun TasksScreen(
                                     taskText = task.content
                                     isUrgent = task.isUrgent
                                     isImportant = task.isImportant
+                                    reminderAt = task.reminderAt
                                     showDialog = true
                                 }
                             )
@@ -301,6 +311,7 @@ fun TasksScreen(
                                     taskText = task.content
                                     isUrgent = task.isUrgent
                                     isImportant = task.isImportant
+                                    reminderAt = task.reminderAt
                                     showDialog = true
                                 },
                                 modifier = Modifier.fillMaxSize()
@@ -318,6 +329,7 @@ fun TasksScreen(
                     taskText = ""
                     isUrgent = false // Сбрасываем при закрытии
                     isImportant = false
+                    reminderAt = null
                 },
                 title = {
                     Text(stringResource(R.string.save_task)) },
@@ -373,6 +385,39 @@ fun TasksScreen(
                                 )
                             )
                         }
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(
+                                text = "Напоминание",
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = reminderAt?.let { "Напомнить: ${formatReminderAt(it)}" }
+                                    ?: "Напоминание не задано",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                TextButton(
+                                    onClick = {
+                                        showReminderDateTimePicker(
+                                            context = context,
+                                            initialReminderAt = reminderAt,
+                                            onReminderSelected = { selectedReminderAt ->
+                                                reminderAt = selectedReminderAt
+                                            }
+                                        )
+                                    }
+                                ) {
+                                    Text(if (reminderAt == null) "Выбрать" else "Изменить")
+                                }
+                                if (reminderAt != null) {
+                                    TextButton(onClick = { reminderAt = null }) {
+                                        Text("Очистить")
+                                    }
+                                }
+                            }
+                        }
                     }
                 },
                 confirmButton = {
@@ -381,22 +426,24 @@ fun TasksScreen(
                             if (taskText.isNotBlank()) {
                                 if (editingTask == null) {
                                     //Создать новую
-                                    viewModel.addTask(taskText, isUrgent, isImportant)
+                                    viewModel.addTask(taskText, isUrgent, isImportant, reminderAt)
                                 } else {
                                     //Редактировать существующую
                                     viewModel.updateTaskDetails(
                                         task = editingTask!!,
                                         content = taskText,
                                         isUrgent = isUrgent,
-                                        isImportant = isImportant
+                                        isImportant = isImportant,
+                                        reminderAt = reminderAt
                                     )
                                 }
                                 // Тут позже вызовем метод ViewModel
                                 showDialog = false
                                 editingTask = null
                                 taskText = ""
-//                                isUrgent = false
-//                                isImportant = false
+                                isUrgent = false
+                                isImportant = false
+                                reminderAt = null
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
@@ -415,6 +462,7 @@ fun TasksScreen(
                             taskText = ""
                             isUrgent = false
                             isImportant = false
+                            reminderAt = null
                         }
                     ) {
                         Text(stringResource(R.string.cancel_button))
@@ -469,6 +517,42 @@ fun TasksScreen(
             )
         }
     }
+}
+
+private fun showReminderDateTimePicker(
+    context: Context,
+    initialReminderAt: Long?,
+    onReminderSelected: (Long) -> Unit
+) {
+    val calendar = Calendar.getInstance().apply {
+        timeInMillis = initialReminderAt ?: System.currentTimeMillis()
+    }
+
+    DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            calendar.set(Calendar.YEAR, year)
+            calendar.set(Calendar.MONTH, month)
+            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+
+            TimePickerDialog(
+                context,
+                { _, hourOfDay, minute ->
+                    calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    calendar.set(Calendar.MINUTE, minute)
+                    calendar.set(Calendar.SECOND, 0)
+                    calendar.set(Calendar.MILLISECOND, 0)
+                    onReminderSelected(calendar.timeInMillis)
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                true
+            ).show()
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    ).show()
 }
 
 @Composable

@@ -15,6 +15,7 @@ data class TaskEntity(
     val isUrgent: Boolean = false,
     val isImportant: Boolean = false,
     val timestamp: Long? = System.currentTimeMillis(),
+    val reminderAt: Long? = null,
     val position: Int = 0,
     val tagId: String? = null,
     val isCompleted: Boolean = false,

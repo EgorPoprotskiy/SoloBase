@@ -25,6 +25,7 @@ class AddTaskUseCaseTest {
         assertFalse(task.isCompleted)
         assertEquals(0, task.position)
         assertEquals(null, task.projectId)
+        assertEquals(null, task.reminderAt)
         assertNotNull(task.timestamp)
         assertEquals(task, repository.tasks.value.single())
     }
@@ -40,5 +41,18 @@ class AddTaskUseCaseTest {
         )
 
         assertEquals("project-1", repository.addedTask!!.projectId)
+    }
+
+    @Test
+    fun `invoke saves reminder when provided`() = kotlinx.coroutines.runBlocking {
+        val repository = FakeTaskRepository()
+        val useCase = AddTaskUseCase(repository)
+
+        useCase(
+            content = "Task with reminder",
+            reminderAt = 1_725_000_000_000L
+        )
+
+        assertEquals(1_725_000_000_000L, repository.addedTask!!.reminderAt)
     }
 }

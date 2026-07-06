@@ -77,7 +77,14 @@ fun TaskMiniItem(
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
             else
                 MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(start = 6.dp)
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 6.dp)
+        )
+        TaskReminderText(
+            reminderAt = task.reminderAt,
+            isCompleted = task.isCompleted,
+            compact = true
         )
     }
 }

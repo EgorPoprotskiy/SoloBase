@@ -143,14 +143,20 @@ class TaskViewModel
     }
 
     // Метод для добавления новой задачи
-    fun addTask(content: String, isUrgent: Boolean = false, isImportant: Boolean = false) {
+    fun addTask(
+        content: String,
+        isUrgent: Boolean = false,
+        isImportant: Boolean = false,
+        reminderAt: Long? = null
+    ) {
         viewModelScope.launch {
             try {
                 addTaskUseCase(
                     content = content,
                     isUrgent = isUrgent,
                     isImportant = isImportant,
-                    projectId = _uiState.value.selectedProjectId
+                    projectId = _uiState.value.selectedProjectId,
+                    reminderAt = reminderAt
                 )
                 clearError()
             } catch (exception: Exception) {
@@ -174,11 +180,12 @@ class TaskViewModel
         task: Task,
         content: String,
         isUrgent: Boolean,
-        isImportant: Boolean
+        isImportant: Boolean,
+        reminderAt: Long?
     ) {
         viewModelScope.launch {
             try {
-                updateTaskDetailsUseCase(task, content, isUrgent, isImportant)
+                updateTaskDetailsUseCase(task, content, isUrgent, isImportant, reminderAt)
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)

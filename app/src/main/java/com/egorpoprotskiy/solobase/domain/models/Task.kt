@@ -14,6 +14,7 @@ data class Task (
 
     // Поле для порядка (пригодится для Канбана и сортировки в списке)
     val timestamp: Long? = System.currentTimeMillis(),            // Время исполнения (для 1-го экрана)
+    val reminderAt: Long? = null,       // Время напоминания внутри приложения
     val position: Int = 0,
     val tagId: String? = null,             // Привязка к цветному тегу
     val isCompleted: Boolean = false,

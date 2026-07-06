@@ -11,13 +11,15 @@ class AddTaskUseCase @Inject constructor(
         content: String,
         isUrgent: Boolean = false,
         isImportant: Boolean = false,
-        projectId: String? = null
+        projectId: String? = null,
+        reminderAt: Long? = null
     ) {
         val task = Task(
             content = content,
             isUrgent = isUrgent,
             isImportant = isImportant,
             timestamp = System.currentTimeMillis(),
+            reminderAt = reminderAt,
             isCompleted = false,
             position = 0,
             projectId = projectId
