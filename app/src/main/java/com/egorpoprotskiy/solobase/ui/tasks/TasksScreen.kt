@@ -333,7 +333,8 @@ fun TasksScreen(
                     reminderAt = null
                 },
                 title = {
-                    Text(stringResource(R.string.save_task)) },
+                    Text(if (editingTask == null) "Новая задача" else "Редактировать задачу")
+                },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedTextField(
