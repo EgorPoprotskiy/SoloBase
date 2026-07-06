@@ -7,6 +7,7 @@ interface TaskRepository {
     // Получение потока задач (Flow — чтобы UI обновлялся сам при синхронизации)
     fun getTasks(): Flow<List<Task>>
     fun getTasksByProject(projectId: String): Flow<List<Task>>
+    suspend fun getFutureActiveReminderTasks(now: Long): List<Task>
     suspend fun getTaskById(id: String): Task?
     suspend fun addTask(task: Task)
     suspend fun updateTask(task: Task)

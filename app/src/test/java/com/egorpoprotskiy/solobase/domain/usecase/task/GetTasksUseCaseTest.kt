@@ -27,7 +27,7 @@ class GetTasksUseCaseTest {
     @Test
     fun `task created inside project does not appear in global task list`() = runBlocking {
         val repository = FakeTaskRepository()
-        val addTaskUseCase = AddTaskUseCase(repository)
+        val addTaskUseCase = AddTaskUseCase(repository, FakeTaskReminderScheduler())
         val getTasksUseCase = GetTasksUseCase(repository)
 
         addTaskUseCase(

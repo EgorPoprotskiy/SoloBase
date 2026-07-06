@@ -9,7 +9,8 @@ class AddTaskUseCaseTest {
     @Test
     fun `invoke creates task with provided details and default values`() = kotlinx.coroutines.runBlocking {
         val repository = FakeTaskRepository()
-        val useCase = AddTaskUseCase(repository)
+        val scheduler = FakeTaskReminderScheduler()
+        val useCase = AddTaskUseCase(repository, scheduler)
 
         useCase(
             content = "Write tests",
@@ -33,7 +34,8 @@ class AddTaskUseCaseTest {
     @Test
     fun `invoke saves project id when provided`() = kotlinx.coroutines.runBlocking {
         val repository = FakeTaskRepository()
-        val useCase = AddTaskUseCase(repository)
+        val scheduler = FakeTaskReminderScheduler()
+        val useCase = AddTaskUseCase(repository, scheduler)
 
         useCase(
             content = "Project task",
@@ -46,13 +48,41 @@ class AddTaskUseCaseTest {
     @Test
     fun `invoke saves reminder when provided`() = kotlinx.coroutines.runBlocking {
         val repository = FakeTaskRepository()
-        val useCase = AddTaskUseCase(repository)
+        val scheduler = FakeTaskReminderScheduler()
+        val useCase = AddTaskUseCase(repository, scheduler)
+        val reminderAt = System.currentTimeMillis() + 60_000L
 
         useCase(
             content = "Task with reminder",
-            reminderAt = 1_725_000_000_000L
+            reminderAt = reminderAt
         )
 
-        assertEquals(1_725_000_000_000L, repository.addedTask!!.reminderAt)
+        assertEquals(reminderAt, repository.addedTask!!.reminderAt)
+        assertEquals(repository.addedTask, scheduler.scheduledTasks.single())
+    }
+
+    @Test
+    fun `invoke does not schedule reminder when reminder is null`() = kotlinx.coroutines.runBlocking {
+        val repository = FakeTaskRepository()
+        val scheduler = FakeTaskReminderScheduler()
+        val useCase = AddTaskUseCase(repository, scheduler)
+
+        useCase(content = "Task")
+
+        assertEquals(emptyList<com.egorpoprotskiy.solobase.domain.models.Task>(), scheduler.scheduledTasks)
+    }
+
+    @Test
+    fun `invoke does not schedule reminder when reminder is in the past`() = kotlinx.coroutines.runBlocking {
+        val repository = FakeTaskRepository()
+        val scheduler = FakeTaskReminderScheduler()
+        val useCase = AddTaskUseCase(repository, scheduler)
+
+        useCase(
+            content = "Past reminder",
+            reminderAt = System.currentTimeMillis() - 60_000L
+        )
+
+        assertEquals(emptyList<com.egorpoprotskiy.solobase.domain.models.Task>(), scheduler.scheduledTasks)
     }
 }

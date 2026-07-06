@@ -24,6 +24,12 @@ class FakeTaskRepository : TaskRepository {
         }
     }
 
+    override suspend fun getFutureActiveReminderTasks(now: Long): List<Task> {
+        return tasks.value.filter { task ->
+            task.reminderAt != null && task.reminderAt > now && !task.isCompleted
+        }
+    }
+
     override suspend fun getTaskById(id: String): Task? = tasks.value.firstOrNull { it.id == id }
 
     override suspend fun addTask(task: Task) {

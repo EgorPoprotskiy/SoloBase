@@ -1,8 +1,10 @@
 package com.egorpoprotskiy.solobase.di
 
+import com.egorpoprotskiy.solobase.data.reminder.AndroidTaskReminderScheduler
 import com.egorpoprotskiy.solobase.data.repository.NoteRepositoryImpl
 import com.egorpoprotskiy.solobase.data.repository.ProjectRepositoryImpl
 import com.egorpoprotskiy.solobase.data.repository.TaskRepositoryImpl
+import com.egorpoprotskiy.solobase.domain.reminder.TaskReminderScheduler
 import com.egorpoprotskiy.solobase.domain.repository.NoteRepository
 import com.egorpoprotskiy.solobase.domain.repository.ProjectRepository
 import com.egorpoprotskiy.solobase.domain.repository.TaskRepository
@@ -32,4 +34,10 @@ abstract class RepositoryModule {
     abstract fun bindNoteRepository(
         noteRepositoryImpl: NoteRepositoryImpl
     ): NoteRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTaskReminderScheduler(
+        androidTaskReminderScheduler: AndroidTaskReminderScheduler
+    ): TaskReminderScheduler
 }

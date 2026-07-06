@@ -20,6 +20,10 @@ class TaskRepositoryImpl @Inject constructor(
         .getTasksByProject(projectId)
         .map { tasks -> tasks.map { it.toDomain() } }
 
+    override suspend fun getFutureActiveReminderTasks(now: Long): List<Task> {
+        return taskDao.getFutureActiveReminderTasks(now).map { it.toDomain() }
+    }
+
     override suspend fun getTaskById(id: String): Task? = taskDao.getTaskById(id)?.toDomain()
 
     override suspend fun addTask(task: Task) = taskDao.insertTask(task.toEntity())

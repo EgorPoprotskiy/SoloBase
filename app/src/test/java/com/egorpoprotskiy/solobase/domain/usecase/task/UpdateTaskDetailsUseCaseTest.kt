@@ -10,7 +10,8 @@ class UpdateTaskDetailsUseCaseTest {
     @Test
     fun `invoke updates task details and keeps other fields`() = kotlinx.coroutines.runBlocking {
         val repository = FakeTaskRepository()
-        val useCase = UpdateTaskDetailsUseCase(repository)
+        val scheduler = FakeTaskReminderScheduler()
+        val useCase = UpdateTaskDetailsUseCase(repository, scheduler)
         val task = Task(
             id = "task-id",
             content = "Old content",
@@ -29,7 +30,7 @@ class UpdateTaskDetailsUseCaseTest {
             content = "New content",
             isUrgent = true,
             isImportant = true,
-            reminderAt = 222L
+            reminderAt = null
         )
 
         val updatedTask = repository.updatedTask!!
@@ -42,13 +43,14 @@ class UpdateTaskDetailsUseCaseTest {
         assertTrue(updatedTask.isCompleted)
         assertEquals("project-id", updatedTask.projectId)
         assertEquals("tag-id", updatedTask.tagId)
-        assertEquals(222L, updatedTask.reminderAt)
+        assertEquals(null, updatedTask.reminderAt)
     }
 
     @Test
     fun `invoke can unset urgency and importance`() = kotlinx.coroutines.runBlocking {
         val repository = FakeTaskRepository()
-        val useCase = UpdateTaskDetailsUseCase(repository)
+        val scheduler = FakeTaskReminderScheduler()
+        val useCase = UpdateTaskDetailsUseCase(repository, scheduler)
         val task = Task(
             content = "Task",
             isUrgent = true,
@@ -71,7 +73,8 @@ class UpdateTaskDetailsUseCaseTest {
     @Test
     fun `invoke can clear reminder`() = kotlinx.coroutines.runBlocking {
         val repository = FakeTaskRepository()
-        val useCase = UpdateTaskDetailsUseCase(repository)
+        val scheduler = FakeTaskReminderScheduler()
+        val useCase = UpdateTaskDetailsUseCase(repository, scheduler)
         val task = Task(
             content = "Task",
             reminderAt = 333L
@@ -86,5 +89,30 @@ class UpdateTaskDetailsUseCaseTest {
         )
 
         assertEquals(null, repository.updatedTask!!.reminderAt)
+        assertEquals(listOf(task.id), scheduler.canceledTaskIds)
+    }
+
+    @Test
+    fun `invoke cancels old reminder and schedules new future reminder`() = kotlinx.coroutines.runBlocking {
+        val repository = FakeTaskRepository()
+        val scheduler = FakeTaskReminderScheduler()
+        val useCase = UpdateTaskDetailsUseCase(repository, scheduler)
+        val task = Task(
+            id = "task-id",
+            content = "Old",
+            reminderAt = System.currentTimeMillis() + 30_000L
+        )
+        val newReminderAt = System.currentTimeMillis() + 60_000L
+
+        useCase(
+            task = task,
+            content = "New",
+            isUrgent = false,
+            isImportant = false,
+            reminderAt = newReminderAt
+        )
+
+        assertEquals(listOf("task-id"), scheduler.canceledTaskIds)
+        assertEquals(newReminderAt, scheduler.scheduledTasks.single().reminderAt)
     }
 }
