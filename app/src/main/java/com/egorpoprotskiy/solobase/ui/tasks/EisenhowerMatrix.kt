@@ -17,8 +17,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.ui.tasks.components.TaskMiniItem
-import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
-import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
+import com.egorpoprotskiy.solobase.ui.theme.TaskImportant
+import com.egorpoprotskiy.solobase.ui.theme.TaskUrgent
 import androidx.compose.material3.Text
 
 @Composable
@@ -41,7 +41,7 @@ fun EisenhowerMatrix(
             Quadrant(
                 title = "Срочно & Важно",
                 tasks = tasks.filter { it.isUrgent && it.isImportant },
-                color = UrgentRed,
+                color = TaskUrgent,
                 onTaskChecked = onTaskChecked,
                 onTaskLongClick = onTaskLongClick,
                 modifier = Modifier.weight(1f)
@@ -49,7 +49,7 @@ fun EisenhowerMatrix(
             Quadrant(
                 title = "Важно",
                 tasks = tasks.filter { !it.isUrgent && it.isImportant },
-                color = ImportantGold,
+                color = TaskImportant,
                 onTaskChecked = onTaskChecked,
                 onTaskLongClick = onTaskLongClick,
                 modifier = Modifier.weight(1f)

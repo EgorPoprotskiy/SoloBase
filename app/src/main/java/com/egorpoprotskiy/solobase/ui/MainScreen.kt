@@ -20,7 +20,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -60,7 +62,11 @@ fun MainScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
         bottomBar = {
-            NavigationBar {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                tonalElevation = NavigationBarDefaults.Elevation
+            ) {
                 MainSection.entries.forEach { section ->
                     NavigationBarItem(
                         selected = selectedSection == section,
@@ -77,7 +83,14 @@ fun MainScreen(
                                 contentDescription = null
                             )
                         },
-                        label = { Text(section.label) }
+                        label = { Text(section.label) },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.secondary,
+                            selectedTextColor = MaterialTheme.colorScheme.secondary,
+                            indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     )
                 }
             }

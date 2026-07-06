@@ -77,8 +77,8 @@ import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.ui.tasks.components.TaskItem
 import com.egorpoprotskiy.solobase.ui.tasks.components.formatReminderAt
-import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
-import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
+import com.egorpoprotskiy.solobase.ui.theme.TaskImportant
+import com.egorpoprotskiy.solobase.ui.theme.TaskUrgent
 import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -360,9 +360,9 @@ fun TasksScreen(
                                 leadingIcon = { Icon(Icons.Default.Bolt, null) },
                                 modifier = Modifier.weight(1f), // Занимает 50% ширины
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = UrgentRed.copy(alpha = 0.2f),
-                                    selectedLabelColor = UrgentRed,
-                                    selectedLeadingIconColor = UrgentRed
+                                    selectedContainerColor = TaskUrgent.copy(alpha = 0.2f),
+                                    selectedLabelColor = TaskUrgent,
+                                    selectedLeadingIconColor = TaskUrgent
                                 )
                             )
                             // Кнопка "Важно"
@@ -379,9 +379,9 @@ fun TasksScreen(
                                 leadingIcon = { Icon(Icons.Default.Star, null) },
                                 modifier = Modifier.weight(1f), // Занимает остальные 50%
                                 colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = ImportantGold.copy(alpha = 0.2f),
-                                    selectedLabelColor = ImportantGold,
-                                    selectedLeadingIconColor = ImportantGold
+                                    selectedContainerColor = TaskImportant.copy(alpha = 0.2f),
+                                    selectedLabelColor = TaskImportant,
+                                    selectedLeadingIconColor = TaskImportant
                                 )
                             )
                         }

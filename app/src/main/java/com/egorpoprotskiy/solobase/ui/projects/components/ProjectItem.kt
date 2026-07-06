@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.egorpoprotskiy.solobase.domain.models.Project
+import com.egorpoprotskiy.solobase.ui.theme.ProjectColorFallback
 
 @Composable
 fun ProjectItem(
@@ -86,5 +87,5 @@ fun ProjectItem(
 
 private fun String.toColorOrFallback(): Color {
     return runCatching { Color(android.graphics.Color.parseColor(this)) }
-        .getOrDefault(Color(0xFF6200EE))
+        .getOrDefault(ProjectColorFallback)
 }

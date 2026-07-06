@@ -6,6 +6,6 @@ data class Project(
     val id: String = UUID.randomUUID().toString(), // Генерируем уникальный ID
     val name: String,                              // Название проекта (например, "SoloBase App")
     val description: String = "",                  // Краткое описание, о чем этот проект
-    val colorHex: String = "#6200EE",             // Цвет обложки или иконки проекта
+    val colorHex: String = ProjectDefaults.DEFAULT_COLOR_HEX, // Цвет обложки или иконки проекта
     val createdAt: Long = System.currentTimeMillis()
 )

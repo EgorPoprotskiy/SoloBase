@@ -15,28 +15,39 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = darkColorScheme(
     primary = SoloGreenLight,
     onPrimary = OnSurfaceWhite,
-    primaryContainer = SoloGreen, // Для темной темы можно чуть потемнее
+    primaryContainer = BrandPrimary,
     onPrimaryContainer = OnSurfaceWhite,
-    secondary = SoloOrange,
+    secondary = BrandAccent,
+    secondaryContainer = BrandAccentContainer,
     background = BackgroundDark,
     surface = SurfaceDark,
+    surfaceVariant = Color(0xFF334155),
     onBackground = OnSurfaceWhite,
-    onSurface = OnSurfaceWhite
+    onSurface = OnSurfaceWhite,
+    onSurfaceVariant = Color(0xFFCBD5E1),
+    outline = Color(0xFF64748B),
+    error = TaskReminderOverdue,
+    errorContainer = TaskReminderOverdueContainer
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = SoloGreen,
+    primary = BrandPrimary,
     onPrimary = Color.White,
-    primaryContainer = SoloGreen,
-    onPrimaryContainer = Color.White,
-    secondary = SoloOrange,
-    onSecondary = Color.White, // Белая иконка на оранжевом фоне
-    secondaryContainer = SoloOrange,
-    onSecondaryContainer = Color.White,
-    background = BackgroundLight,
-    surface = Color.White,
+    primaryContainer = BrandPrimaryContainer,
+    onPrimaryContainer = BrandPrimary,
+    secondary = BrandAccent,
+    onSecondary = Color.White,
+    secondaryContainer = BrandAccentContainer,
+    onSecondaryContainer = Color(0xFF064E3B),
+    background = AppBackground,
+    surface = AppSurface,
+    surfaceVariant = AppSurfaceVariant,
     onBackground = OnSurfaceBlack,
-    onSurface = OnSurfaceBlack
+    onSurface = OnSurfaceBlack,
+    onSurfaceVariant = TextSecondary,
+    outline = AppOutline,
+    error = TaskReminderOverdue,
+    errorContainer = TaskReminderOverdueContainer
 )
 
 @Composable

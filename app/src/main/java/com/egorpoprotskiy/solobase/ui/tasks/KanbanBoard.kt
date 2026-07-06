@@ -44,8 +44,8 @@ import androidx.compose.ui.unit.toSize
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.domain.models.TaskStatus
 import com.egorpoprotskiy.solobase.ui.tasks.components.TaskReminderText
-import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
-import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
+import com.egorpoprotskiy.solobase.ui.theme.TaskImportant
+import com.egorpoprotskiy.solobase.ui.theme.TaskUrgent
 
 @Composable
 fun KanbanBoard(
@@ -234,7 +234,7 @@ private fun KanbanTaskCard(
                         Icon(
                             imageVector = Icons.Default.Bolt,
                             contentDescription = null,
-                            tint = UrgentRed,
+                            tint = TaskUrgent,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -242,7 +242,7 @@ private fun KanbanTaskCard(
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
-                            tint = ImportantGold,
+                            tint = TaskImportant,
                             modifier = Modifier.size(18.dp)
                         )
                     }

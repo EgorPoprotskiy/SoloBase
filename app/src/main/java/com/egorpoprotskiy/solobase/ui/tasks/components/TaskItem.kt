@@ -46,9 +46,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.room.util.TableInfo
 import com.egorpoprotskiy.solobase.domain.models.Task
-import com.egorpoprotskiy.solobase.ui.theme.ImportantGold
+import com.egorpoprotskiy.solobase.ui.theme.TaskImportant
+import com.egorpoprotskiy.solobase.ui.theme.TaskUrgent
 import com.egorpoprotskiy.solobase.ui.theme.SoloBaseTheme
-import com.egorpoprotskiy.solobase.ui.theme.UrgentRed
 
 @Composable
 fun TaskItem(
@@ -126,7 +126,7 @@ fun TaskItem(
                 Icon(
                     imageVector = Icons.Default.Bolt,
                     contentDescription = "Urgent",
-                    tint = if (task.isCompleted) UrgentRed.copy(alpha = 0.4f) else UrgentRed,
+                    tint = if (task.isCompleted) TaskUrgent.copy(alpha = 0.4f) else TaskUrgent,
                     modifier = Modifier.size(22.dp).padding(end = 4.dp)
                 )
             }
@@ -135,7 +135,7 @@ fun TaskItem(
                 Icon(
                     imageVector = Icons.Default.Star, // ВОТ ОНА! :)
                     contentDescription = "Important",
-                    tint = if (task.isCompleted) ImportantGold.copy(alpha = 0.4f) else ImportantGold,
+                    tint = if (task.isCompleted) TaskImportant.copy(alpha = 0.4f) else TaskImportant,
                     modifier = Modifier.size(22.dp).padding(end = 4.dp)
                 )
             }

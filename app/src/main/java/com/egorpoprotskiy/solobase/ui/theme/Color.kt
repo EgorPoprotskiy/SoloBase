@@ -3,20 +3,37 @@ package com.egorpoprotskiy.solobase.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // --- SOLOBASE BRAND IDENTITY ---
-val SoloGreen = Color(0xFF374930)         // Темно-зеленый
-val SoloGreenLight = Color(0xFF4E6346)    // Светло-зеленый (для темной темы)
-val SoloOrange = Color(0xFFCA5731)        // Оранжевый акцент
+val BrandPrimary = Color(0xFF1F2937)
+val BrandPrimaryContainer = Color(0xFFD9E2EC)
+val BrandAccent = Color(0xFF10B981)
+val BrandAccentContainer = Color(0xFFD1FAE5)
 
 // --- НЕЙТРАЛЬНЫЕ ЦВЕТА ---
-val BackgroundLight = Color(0xFFFDFCFB)   // Мягкий кремовый фон
+val AppBackground = Color(0xFFF8FAFC)
+val AppSurface = Color(0xFFFFFFFF)
+val AppSurfaceVariant = Color(0xFFE8EEF5)
+val AppOutline = Color(0xFFCBD5E1)
+val TextPrimary = Color(0xFF111827)
+val TextSecondary = Color(0xFF6B7280)
 val BackgroundDark = Color(0xFF121212)    // Темный фон
 val SurfaceDark = Color(0xFF1E1E1E)       // Карточки в темной теме
 val OnSurfaceWhite = Color(0xFFF5F5F5)
-val OnSurfaceBlack = Color(0xFF1A1C1E)
+val OnSurfaceBlack = TextPrimary
 
 // --- ДОПОЛНИТЕЛЬНЫЕ (Эйзенхауэр) ---
-val UrgentRed = Color(0xFFFF5252)
-val ImportantGold = Color(0xFFFFC107)
+val TaskUrgent = Color(0xFFE11D48)
+val TaskImportant = Color(0xFFF59E0B)
+val TaskReminderOverdue = Color(0xFFE11D48)
+val TaskReminderOverdueContainer = Color(0xFFFFE4E6)
+val ProjectColorFallback = Color(0xFF64748B)
+
+// Backward-compatible aliases for existing components.
+val SoloGreen = BrandPrimary
+val SoloGreenLight = Color(0xFF475569)
+val SoloOrange = BrandAccent
+val BackgroundLight = AppBackground
+val UrgentRed = TaskUrgent
+val ImportantGold = TaskImportant
 
 // --- ЦВЕТА ТЕГОВ (Tag Colors) ---
 // Пригодятся на 2-м экране для заметок и фильтров
