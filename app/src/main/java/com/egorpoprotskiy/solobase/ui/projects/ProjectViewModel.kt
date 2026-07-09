@@ -2,9 +2,11 @@ package com.egorpoprotskiy.solobase.ui.projects
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.domain.usecase.project.AddProjectUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.project.DeleteProjectUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.project.GetProjectsUseCase
+import com.egorpoprotskiy.solobase.domain.usecase.project.UpdateProjectUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +21,8 @@ import javax.inject.Inject
 class ProjectViewModel @Inject constructor(
     private val getProjectsUseCase: GetProjectsUseCase,
     private val addProjectUseCase: AddProjectUseCase,
-    private val deleteProjectUseCase: DeleteProjectUseCase
+    private val deleteProjectUseCase: DeleteProjectUseCase,
+    private val updateProjectUseCase: UpdateProjectUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProjectsUiState())
     val uiState: StateFlow<ProjectsUiState> = _uiState.asStateFlow()
@@ -68,6 +71,21 @@ class ProjectViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 deleteProjectUseCase(projectId)
+                clearError()
+            } catch (exception: Exception) {
+                handleOperationError(exception)
+            }
+        }
+    }
+
+    fun updateProjectDetails(project: Project, name: String, description: String) {
+        viewModelScope.launch {
+            try {
+                updateProjectUseCase(
+                    project = project,
+                    name = name,
+                    description = description
+                )
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)

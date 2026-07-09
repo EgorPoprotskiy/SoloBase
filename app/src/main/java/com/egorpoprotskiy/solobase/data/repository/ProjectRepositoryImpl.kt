@@ -17,5 +17,7 @@ class ProjectRepositoryImpl @Inject constructor(
 
     override suspend fun addProject(project: Project) = projectDao.insertProject(project.toEntity())
 
+    override suspend fun updateProject(project: Project) = projectDao.updateProject(project.toEntity())
+
     override suspend fun deleteProject(id: String) = projectDao.deleteProjectById(id)
 }

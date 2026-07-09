@@ -1,6 +1,8 @@
 package com.egorpoprotskiy.solobase.ui.projects.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,16 +27,22 @@ import androidx.compose.ui.unit.dp
 import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.ui.theme.ProjectColorFallback
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ProjectItem(
     project: Project,
     onClick: () -> Unit,
+    onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     ElevatedCard(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = onClick,
+                onLongClick = onEditClick
+            ),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
@@ -77,7 +85,7 @@ fun ProjectItem(
             IconButton(onClick = onDeleteClick) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = null,
+                    contentDescription = "Удалить проект",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

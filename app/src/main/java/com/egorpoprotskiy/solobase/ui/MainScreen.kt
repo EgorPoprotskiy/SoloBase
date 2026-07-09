@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +42,7 @@ import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.ui.notes.ProjectNotesViewModel
 import com.egorpoprotskiy.solobase.ui.notes.ProjectNotesScreen
 import com.egorpoprotskiy.solobase.ui.projects.ProjectsScreen
+import com.egorpoprotskiy.solobase.ui.projects.ProjectViewModel
 import com.egorpoprotskiy.solobase.ui.tasks.SearchTextField
 import com.egorpoprotskiy.solobase.ui.tasks.TaskViewModel
 import com.egorpoprotskiy.solobase.ui.tasks.TasksControlsMenu
@@ -49,7 +51,8 @@ import com.egorpoprotskiy.solobase.ui.tasks.TasksScreen
 @Composable
 fun MainScreen(
     taskViewModel: TaskViewModel = hiltViewModel(),
-    projectNotesViewModel: ProjectNotesViewModel = hiltViewModel()
+    projectNotesViewModel: ProjectNotesViewModel = hiltViewModel(),
+    projectViewModel: ProjectViewModel = hiltViewModel()
 ) {
     var selectedSection by remember { mutableStateOf(MainSection.TASKS) }
     var selectedProject by remember { mutableStateOf<Project?>(null) }
@@ -58,6 +61,12 @@ fun MainScreen(
     var projectSearchMode by remember { mutableStateOf(false) }
     val taskUiState by taskViewModel.uiState.collectAsStateWithLifecycle()
     val notesUiState by projectNotesViewModel.uiState.collectAsStateWithLifecycle()
+    val projectsUiState by projectViewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(selectedProject?.id, projectsUiState.projects) {
+        val currentProject = selectedProject ?: return@LaunchedEffect
+        selectedProject = projectsUiState.projects.firstOrNull { it.id == currentProject.id }
+    }
 
     Scaffold(
         contentWindowInsets = WindowInsets(0.dp),
@@ -202,7 +211,8 @@ fun MainScreen(
                                 selectedProject = project
                                 selectedProjectSection = ProjectSection.TASKS
                                 selectedSection = MainSection.TASKS
-                            }
+                            },
+                            viewModel = projectViewModel
                         )
                     }
                 }

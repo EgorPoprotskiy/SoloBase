@@ -54,6 +54,7 @@ fun ProjectsScreen(
     var showDialog by remember { mutableStateOf(false) }
     var projectName by remember { mutableStateOf("") }
     var projectDescription by remember { mutableStateOf("") }
+    var editingProject by remember { mutableStateOf<Project?>(null) }
     var projectToDelete by remember { mutableStateOf<Project?>(null) }
 
     LaunchedEffect(viewModel) {
@@ -84,7 +85,12 @@ fun ProjectsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showDialog = true },
+                onClick = {
+                    editingProject = null
+                    projectName = ""
+                    projectDescription = ""
+                    showDialog = true
+                },
                 containerColor = MaterialTheme.colorScheme.secondary,
                 contentColor = MaterialTheme.colorScheme.onSecondary
             ) {
@@ -117,6 +123,12 @@ fun ProjectsScreen(
                     ProjectItem(
                         project = project,
                         onClick = { onProjectClick(project) },
+                        onEditClick = {
+                            editingProject = project
+                            projectName = project.name
+                            projectDescription = project.description
+                            showDialog = true
+                        },
                         onDeleteClick = { projectToDelete = project }
                     )
                 }
@@ -127,10 +139,13 @@ fun ProjectsScreen(
             AlertDialog(
                 onDismissRequest = {
                     showDialog = false
+                    editingProject = null
                     projectName = ""
                     projectDescription = ""
                 },
-                title = { Text("Новый проект") },
+                title = {
+                    Text(if (editingProject == null) "Новый проект" else "Редактировать проект")
+                },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedTextField(
@@ -153,11 +168,21 @@ fun ProjectsScreen(
                     TextButton(
                         onClick = {
                             if (projectName.isNotBlank()) {
-                                viewModel.addProject(
-                                    name = projectName,
-                                    description = projectDescription
-                                )
+                                val currentProject = editingProject
+                                if (currentProject == null) {
+                                    viewModel.addProject(
+                                        name = projectName,
+                                        description = projectDescription
+                                    )
+                                } else {
+                                    viewModel.updateProjectDetails(
+                                        project = currentProject,
+                                        name = projectName,
+                                        description = projectDescription
+                                    )
+                                }
                                 showDialog = false
+                                editingProject = null
                                 projectName = ""
                                 projectDescription = ""
                             }
@@ -173,6 +198,7 @@ fun ProjectsScreen(
                     TextButton(
                         onClick = {
                             showDialog = false
+                            editingProject = null
                             projectName = ""
                             projectDescription = ""
                         }
