@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.activity.compose.BackHandler
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
@@ -62,6 +63,20 @@ fun MainScreen(
     val taskUiState by taskViewModel.uiState.collectAsStateWithLifecycle()
     val notesUiState by projectNotesViewModel.uiState.collectAsStateWithLifecycle()
     val projectsUiState by projectViewModel.uiState.collectAsStateWithLifecycle()
+
+    fun closeSelectedProject() {
+        taskViewModel.updateSearchQuery("")
+        projectNotesViewModel.updateSearchQuery("")
+        projectControlsMenuExpanded = false
+        projectSearchMode = false
+        selectedProject = null
+        selectedProjectSection = ProjectSection.TASKS
+        selectedSection = MainSection.PROJECTS
+    }
+
+    BackHandler(enabled = selectedProject != null) {
+        closeSelectedProject()
+    }
 
     LaunchedEffect(selectedProject?.id, projectsUiState.projects) {
         val currentProject = selectedProject ?: return@LaunchedEffect
@@ -139,14 +154,7 @@ fun MainScreen(
                             } else {
                                 "Поиск заметок"
                             },
-                            onBackClick = {
-                                taskViewModel.updateSearchQuery("")
-                                projectNotesViewModel.updateSearchQuery("")
-                                projectSearchMode = false
-                                selectedProject = null
-                                selectedProjectSection = ProjectSection.TASKS
-                                selectedSection = MainSection.PROJECTS
-                            },
+                            onBackClick = ::closeSelectedProject,
                             onProjectSectionSelected = {
                                 projectSearchMode = false
                                 taskViewModel.updateSearchQuery("")
@@ -183,11 +191,7 @@ fun MainScreen(
                                     selectedProject = project,
                                     topAppBarWindowInsets = WindowInsets(0.dp),
                                     showTopAppBar = false,
-                                    onBackToProjects = {
-                                        selectedProject = null
-                                        selectedProjectSection = ProjectSection.TASKS
-                                        selectedSection = MainSection.PROJECTS
-                                    },
+                                    onBackToProjects = ::closeSelectedProject,
                                     viewModel = taskViewModel
                                 )
                                 ProjectSection.NOTES -> ProjectNotesScreen(
