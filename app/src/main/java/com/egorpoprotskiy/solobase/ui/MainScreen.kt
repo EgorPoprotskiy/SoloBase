@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.activity.compose.BackHandler
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
@@ -35,10 +36,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.egorpoprotskiy.solobase.R
 import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.ui.notes.ProjectNotesViewModel
 import com.egorpoprotskiy.solobase.ui.notes.ProjectNotesScreen
@@ -107,7 +110,7 @@ fun MainScreen(
                                 contentDescription = null
                             )
                         },
-                        label = { Text(section.label) },
+                        label = { Text(stringResource(section.labelRes)) },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = MaterialTheme.colorScheme.secondary,
                             selectedTextColor = MaterialTheme.colorScheme.secondary,
@@ -150,9 +153,9 @@ fun MainScreen(
                                 notesUiState.searchQuery
                             },
                             searchPlaceholder = if (selectedProjectSection == ProjectSection.TASKS) {
-                                "Поиск задач"
+                                stringResource(R.string.search_tasks_hint)
                             } else {
-                                "Поиск заметок"
+                                stringResource(R.string.search_notes_hint)
                             },
                             onBackClick = ::closeSelectedProject,
                             onProjectSectionSelected = {
@@ -225,14 +228,14 @@ fun MainScreen(
     }
 }
 
-private enum class MainSection(val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
-    TASKS("Задачи", Icons.AutoMirrored.Filled.List),
-    PROJECTS("Проекты", Icons.Default.Folder)
+private enum class MainSection(@param:StringRes val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
+    TASKS(R.string.nav_tasks, Icons.AutoMirrored.Filled.List),
+    PROJECTS(R.string.nav_projects, Icons.Default.Folder)
 }
 
-private enum class ProjectSection(val label: String) {
-    TASKS("Задачи"),
-    NOTES("Заметки")
+private enum class ProjectSection(@param:StringRes val labelRes: Int) {
+    TASKS(R.string.project_section_tasks),
+    NOTES(R.string.project_section_notes)
 }
 
 @Composable
@@ -277,7 +280,7 @@ private fun ProjectHeader(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null
+                    contentDescription = stringResource(R.string.back_button)
                 )
             }
         },
@@ -286,7 +289,7 @@ private fun ProjectHeader(
                 IconButton(onClick = { onProjectSectionSelected(ProjectSection.TASKS) }) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.List,
-                        contentDescription = "Задачи",
+                        contentDescription = stringResource(R.string.project_section_tasks),
                         tint = if (selectedProjectSection == ProjectSection.TASKS) {
                             MaterialTheme.colorScheme.onPrimary
                         } else {
@@ -297,7 +300,7 @@ private fun ProjectHeader(
                 IconButton(onClick = { onProjectSectionSelected(ProjectSection.NOTES) }) {
                     Icon(
                         imageVector = Icons.Default.Description,
-                        contentDescription = "Заметки",
+                        contentDescription = stringResource(R.string.project_section_notes),
                         tint = if (selectedProjectSection == ProjectSection.NOTES) {
                             MaterialTheme.colorScheme.onPrimary
                         } else {
@@ -308,7 +311,7 @@ private fun ProjectHeader(
                 IconButton(onClick = onSearchClick) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Поиск",
+                        contentDescription = stringResource(R.string.content_description_search),
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }

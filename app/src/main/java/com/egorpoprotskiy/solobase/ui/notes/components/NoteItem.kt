@@ -15,8 +15,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.egorpoprotskiy.solobase.R
 import com.egorpoprotskiy.solobase.domain.models.Note
 
 @Composable
@@ -50,7 +52,7 @@ fun NoteItem(
             IconButton(onClick = onDeleteClick) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.content_description_delete_note),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

@@ -34,11 +34,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.egorpoprotskiy.solobase.R
 import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.ui.components.DeleteConfirmationDialog
 import com.egorpoprotskiy.solobase.ui.projects.components.ProjectItem
@@ -72,7 +74,7 @@ fun ProjectsScreen(
                 windowInsets = WindowInsets.statusBars,
                 title = {
                     Text(
-                        text = "Проекты",
+                        text = stringResource(R.string.projects_title),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -96,7 +98,7 @@ fun ProjectsScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = null
+                    contentDescription = stringResource(R.string.content_description_add_project)
                 )
             }
         },
@@ -144,21 +146,27 @@ fun ProjectsScreen(
                     projectDescription = ""
                 },
                 title = {
-                    Text(if (editingProject == null) "Новый проект" else "Редактировать проект")
+                    Text(
+                        if (editingProject == null) {
+                            stringResource(R.string.project_new_title)
+                        } else {
+                            stringResource(R.string.project_edit_title)
+                        }
+                    )
                 },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedTextField(
                             value = projectName,
                             onValueChange = { projectName = it },
-                            label = { Text("Название") },
+                            label = { Text(stringResource(R.string.project_name_label)) },
                             singleLine = true,
                             modifier = Modifier.fillMaxWidth()
                         )
                         OutlinedTextField(
                             value = projectDescription,
                             onValueChange = { projectDescription = it },
-                            label = { Text("Описание") },
+                            label = { Text(stringResource(R.string.project_description_label)) },
                             singleLine = false,
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -191,7 +199,7 @@ fun ProjectsScreen(
                             containerColor = MaterialTheme.colorScheme.secondary
                         )
                     ) {
-                        Text("Сохранить")
+                        Text(stringResource(R.string.action_save))
                     }
                 },
                 dismissButton = {
@@ -203,7 +211,7 @@ fun ProjectsScreen(
                             projectDescription = ""
                         }
                     ) {
-                        Text("Отмена")
+                        Text(stringResource(R.string.action_cancel))
                     }
                 }
             )
@@ -211,7 +219,7 @@ fun ProjectsScreen(
 
         if (projectToDelete != null) {
             DeleteConfirmationDialog(
-                title = "Удалить проект?",
+                title = stringResource(R.string.project_delete_title),
                 onConfirm = {
                     viewModel.deleteProject(projectToDelete!!.id)
                     projectToDelete = null
@@ -237,12 +245,12 @@ private fun ProjectsEmptyState(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "Проектов пока нет",
+                text = stringResource(R.string.empty_projects_title),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "Добавьте первый проект",
+                text = stringResource(R.string.empty_projects_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center

@@ -39,12 +39,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.room.util.TableInfo
+import com.egorpoprotskiy.solobase.R
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.ui.theme.TaskImportant
 import com.egorpoprotskiy.solobase.ui.theme.TaskUrgent
@@ -125,7 +127,7 @@ fun TaskItem(
             if (task.isUrgent) {
                 Icon(
                     imageVector = Icons.Default.Bolt,
-                    contentDescription = "Urgent",
+                    contentDescription = stringResource(R.string.content_description_urgent),
                     tint = if (task.isCompleted) TaskUrgent.copy(alpha = 0.4f) else TaskUrgent,
                     modifier = Modifier.size(22.dp).padding(end = 4.dp)
                 )
@@ -134,7 +136,7 @@ fun TaskItem(
             if (task.isImportant) {
                 Icon(
                     imageVector = Icons.Default.Star, // ВОТ ОНА! :)
-                    contentDescription = "Important",
+                    contentDescription = stringResource(R.string.content_description_important),
                     tint = if (task.isCompleted) TaskImportant.copy(alpha = 0.4f) else TaskImportant,
                     modifier = Modifier.size(22.dp).padding(end = 4.dp)
                 )
@@ -147,7 +149,7 @@ fun TaskItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(R.string.content_description_delete_task),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
                     modifier = Modifier.size(20.dp)
                 )

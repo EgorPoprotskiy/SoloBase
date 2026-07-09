@@ -20,6 +20,8 @@ import com.egorpoprotskiy.solobase.ui.tasks.components.TaskMiniItem
 import com.egorpoprotskiy.solobase.ui.theme.TaskImportant
 import com.egorpoprotskiy.solobase.ui.theme.TaskUrgent
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.stringResource
+import com.egorpoprotskiy.solobase.R
 
 @Composable
 fun EisenhowerMatrix(
@@ -39,7 +41,7 @@ fun EisenhowerMatrix(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Quadrant(
-                title = "Срочно & Важно",
+                title = stringResource(R.string.matrix_urgent_important),
                 tasks = tasks.filter { it.isUrgent && it.isImportant },
                 color = TaskUrgent,
                 onTaskChecked = onTaskChecked,
@@ -47,7 +49,7 @@ fun EisenhowerMatrix(
                 modifier = Modifier.weight(1f)
             )
             Quadrant(
-                title = "Важно",
+                title = stringResource(R.string.matrix_important),
                 tasks = tasks.filter { !it.isUrgent && it.isImportant },
                 color = TaskImportant,
                 onTaskChecked = onTaskChecked,
@@ -60,7 +62,7 @@ fun EisenhowerMatrix(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Quadrant(
-                title = "Срочно",
+                title = stringResource(R.string.matrix_urgent),
                 tasks = tasks.filter { it.isUrgent && !it.isImportant },
                 color = MaterialTheme.colorScheme.primary, // Твой SoloGreen
                 onTaskChecked = onTaskChecked,
@@ -68,7 +70,7 @@ fun EisenhowerMatrix(
                 modifier = Modifier.weight(1f)
             )
             Quadrant(
-                title = "Прочее",
+                title = stringResource(R.string.matrix_other),
                 tasks = tasks.filter { !it.isUrgent && !it.isImportant },
                 color = MaterialTheme.colorScheme.outline,
                 onTaskChecked = onTaskChecked,

@@ -22,8 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.egorpoprotskiy.solobase.R
 import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.ui.theme.ProjectColorFallback
 
@@ -85,7 +87,7 @@ fun ProjectItem(
             IconButton(onClick = onDeleteClick) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Удалить проект",
+                    contentDescription = stringResource(R.string.content_description_delete_project),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

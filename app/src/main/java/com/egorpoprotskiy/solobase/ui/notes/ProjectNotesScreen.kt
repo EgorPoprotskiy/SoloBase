@@ -36,10 +36,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.egorpoprotskiy.solobase.R
 import com.egorpoprotskiy.solobase.domain.models.Note
 import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.ui.components.DeleteConfirmationDialog
@@ -86,14 +88,14 @@ fun ProjectNotesScreen(
                             SearchTextField(
                                 value = searchQuery,
                                 onValueChange = viewModel::updateSearchQuery,
-                                placeholder = "Поиск заметок",
+                                placeholder = stringResource(R.string.search_notes_hint),
                                 onClose = {
                                     searchMode = false
                                     viewModel.updateSearchQuery("")
                                 }
                             )
                         } else {
-                            Text("${project.name}: заметки")
+                            Text(stringResource(R.string.project_notes_title, project.name))
                         }
                     },
                     actions = {
@@ -101,7 +103,7 @@ fun ProjectNotesScreen(
                             IconButton(onClick = { searchMode = true }) {
                                 Icon(
                                     imageVector = Icons.Default.Search,
-                                    contentDescription = "Поиск",
+                                    contentDescription = stringResource(R.string.content_description_search),
                                     tint = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
@@ -124,7 +126,7 @@ fun ProjectNotesScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = null
+                    contentDescription = stringResource(R.string.content_description_add_note)
                 )
             }
         },
@@ -173,13 +175,19 @@ fun ProjectNotesScreen(
                     noteText = ""
                 },
                 title = {
-                    Text(if (editingNote == null) "Новая заметка" else "Редактировать заметку")
+                    Text(
+                        if (editingNote == null) {
+                            stringResource(R.string.note_new_title)
+                        } else {
+                            stringResource(R.string.note_edit_title)
+                        }
+                    )
                 },
                 text = {
                     OutlinedTextField(
                         value = noteText,
                         onValueChange = { noteText = it },
-                        label = { Text("Текст заметки") },
+                        label = { Text(stringResource(R.string.note_text_label)) },
                         singleLine = false,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -203,7 +211,7 @@ fun ProjectNotesScreen(
                             containerColor = MaterialTheme.colorScheme.secondary
                         )
                     ) {
-                        Text("Сохранить")
+                        Text(stringResource(R.string.action_save))
                     }
                 },
                 dismissButton = {
@@ -214,7 +222,7 @@ fun ProjectNotesScreen(
                             noteText = ""
                         }
                     ) {
-                        Text("Отмена")
+                        Text(stringResource(R.string.action_cancel))
                     }
                 }
             )
@@ -222,7 +230,7 @@ fun ProjectNotesScreen(
 
         if (noteToDelete != null) {
             DeleteConfirmationDialog(
-                title = "Удалить заметку?",
+                title = stringResource(R.string.note_delete_title),
                 onConfirm = {
                     viewModel.deleteNote(noteToDelete!!.id)
                     noteToDelete = null
@@ -249,13 +257,17 @@ private fun NotesEmptyState(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = if (isSearching) "Ничего не найдено" else "Заметок пока нет",
+                text = if (isSearching) {
+                    stringResource(R.string.empty_search_results)
+                } else {
+                    stringResource(R.string.empty_notes_title)
+                },
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
             if (!isSearching) {
                 Text(
-                    text = "Добавьте первую заметку проекта",
+                    text = stringResource(R.string.empty_notes_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center

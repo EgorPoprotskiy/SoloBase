@@ -21,4 +21,91 @@
     <string name="sample_task_db_connected">База данных подключена</string>
     <string name="sample_task_hilt_works">Hilt работает</string>
     <string name="change_mode">Сменить режим</string>
+
+    <string name="nav_tasks">Задачи</string>
+    <string name="nav_projects">Проекты</string>
+    <string name="project_section_tasks">Задачи</string>
+    <string name="project_section_notes">Заметки</string>
+
+    <string name="action_save">Сохранить</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="action_delete">Удалить</string>
+    <string name="action_select">Выбрать</string>
+    <string name="action_change">Изменить</string>
+    <string name="action_clear">Очистить</string>
+
+    <string name="content_description_search">Поиск</string>
+    <string name="content_description_display_settings">Настройки отображения</string>
+    <string name="content_description_delete_task">Удалить задачу</string>
+    <string name="content_description_delete_note">Удалить заметку</string>
+    <string name="content_description_delete_project">Удалить проект</string>
+    <string name="content_description_add_task">Добавить задачу</string>
+    <string name="content_description_add_note">Добавить заметку</string>
+    <string name="content_description_add_project">Добавить проект</string>
+    <string name="content_description_close_search">Закрыть поиск</string>
+    <string name="content_description_urgent">Срочно</string>
+    <string name="content_description_important">Важно</string>
+    <string name="content_description_reminder">Напоминание</string>
+    <string name="content_description_move_left">Переместить влево</string>
+    <string name="content_description_move_right">Переместить вправо</string>
+
+    <string name="task_new_title">Новая задача</string>
+    <string name="task_edit_title">Редактировать задачу</string>
+    <string name="task_delete_title">Удалить задачу?</string>
+    <string name="task_urgent">Срочно</string>
+    <string name="task_important">Важно</string>
+    <string name="task_reminder_label">Напоминание</string>
+    <string name="task_reminder_at">Напомнить: %1$s</string>
+    <string name="task_reminder_not_set">Напоминание не задано</string>
+
+    <string name="search_tasks_hint">Поиск задач</string>
+    <string name="search_notes_hint">Поиск заметок</string>
+    <string name="empty_search_results">Ничего не найдено</string>
+    <string name="empty_tasks_filtered">Нет задач для выбранного фильтра</string>
+    <string name="empty_tasks_filtered_subtitle">Выберите другой фильтр или добавьте новую задачу</string>
+
+    <string name="task_filter_all">Все</string>
+    <string name="task_filter_active">Активные</string>
+    <string name="task_filter_completed">Выполненные</string>
+    <string name="task_filter_urgent">Срочные</string>
+    <string name="task_filter_important">Важные</string>
+    <string name="task_filter_selected_chip">%1$s ×</string>
+
+    <string name="display_mode_list">Список</string>
+    <string name="display_mode_matrix">Матрица</string>
+    <string name="display_mode_kanban">Kanban</string>
+    <string name="tasks_controls_view">Вид</string>
+    <string name="tasks_controls_filter">Фильтр</string>
+
+    <string name="matrix_urgent_important">Срочно &amp; Важно</string>
+    <string name="matrix_important">Важно</string>
+    <string name="matrix_urgent">Срочно</string>
+    <string name="matrix_other">Прочее</string>
+
+    <string name="kanban_backlog">Backlog</string>
+    <string name="kanban_todo">To Do</string>
+    <string name="kanban_in_progress">In Progress</string>
+    <string name="kanban_done">Done</string>
+    <string name="kanban_column_title">%1$s (%2$d)</string>
+
+    <string name="projects_title">Проекты</string>
+    <string name="project_new_title">Новый проект</string>
+    <string name="project_edit_title">Редактировать проект</string>
+    <string name="project_delete_title">Удалить проект?</string>
+    <string name="project_name_label">Название</string>
+    <string name="project_description_label">Описание</string>
+    <string name="empty_projects_title">Проектов пока нет</string>
+    <string name="empty_projects_subtitle">Добавьте первый проект</string>
+
+    <string name="note_new_title">Новая заметка</string>
+    <string name="note_edit_title">Редактировать заметку</string>
+    <string name="note_delete_title">Удалить заметку?</string>
+    <string name="note_text_label">Текст заметки</string>
+    <string name="project_notes_title">%1$s: заметки</string>
+    <string name="empty_notes_title">Заметок пока нет</string>
+    <string name="empty_notes_subtitle">Добавьте первую заметку проекта</string>
+
+    <string name="task_reminder_channel_name">Напоминания задач</string>
+    <string name="task_reminder_channel_description">Уведомления о запланированных задачах</string>
+    <string name="task_reminder_notification_title">Напоминание</string>
 </resources>

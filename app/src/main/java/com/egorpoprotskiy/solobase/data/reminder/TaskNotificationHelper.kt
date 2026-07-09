@@ -20,10 +20,10 @@ object TaskNotificationHelper {
 
         val channel = NotificationChannel(
             TaskReminderConstants.CHANNEL_ID,
-            "Напоминания задач",
+            context.getString(R.string.task_reminder_channel_name),
             NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "Уведомления о запланированных задачах"
+            description = context.getString(R.string.task_reminder_channel_description)
         }
 
         val notificationManager = context.getSystemService(NotificationManager::class.java)
@@ -51,7 +51,7 @@ object TaskNotificationHelper {
 
         val notification = NotificationCompat.Builder(context, TaskReminderConstants.CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("Напоминание")
+            .setContentTitle(context.getString(R.string.task_reminder_notification_title))
             .setContentText(task.content)
             .setStyle(NotificationCompat.BigTextStyle().bigText(task.content))
             .setContentIntent(contentIntent)

@@ -1,7 +1,9 @@
 package com.egorpoprotskiy.solobase.ui.tasks
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.egorpoprotskiy.solobase.R
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.domain.models.TaskStatus
 import com.egorpoprotskiy.solobase.domain.usecase.task.AddTaskUseCase
@@ -248,8 +250,8 @@ class TaskViewModel
     }
 }
 
-enum class TasksDisplayMode(val label: String) {
-    LIST("Список"),
-    MATRIX("Матрица"),
-    KANBAN("Kanban")
+enum class TasksDisplayMode(@param:StringRes val labelRes: Int) {
+    LIST(R.string.display_mode_list),
+    MATRIX(R.string.display_mode_matrix),
+    KANBAN(R.string.display_mode_kanban)
 }

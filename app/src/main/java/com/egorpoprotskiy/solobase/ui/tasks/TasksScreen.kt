@@ -138,7 +138,7 @@ fun TasksScreen(
                             SearchTextField(
                                 value = searchQuery,
                                 onValueChange = viewModel::updateSearchQuery,
-                                placeholder = "Поиск задач",
+                                placeholder = stringResource(R.string.search_tasks_hint),
                                 onClose = {
                                     searchMode = false
                                     viewModel.updateSearchQuery("")
@@ -157,7 +157,7 @@ fun TasksScreen(
                             IconButton(onClick = onBackToProjects) {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = null
+                                    contentDescription = stringResource(R.string.back_button)
                                 )
                             }
                         }
@@ -167,7 +167,7 @@ fun TasksScreen(
                             IconButton(onClick = { searchMode = true }) {
                                 Icon(
                                     imageVector = Icons.Default.Search,
-                                    contentDescription = "Поиск",
+                                    contentDescription = stringResource(R.string.content_description_search),
                                     tint = MaterialTheme.colorScheme.onPrimary
                                 )
                             }
@@ -200,7 +200,7 @@ fun TasksScreen(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(R.string.add_new_task)
+                    contentDescription = stringResource(R.string.content_description_add_task)
                 )
             }
         },
@@ -221,7 +221,14 @@ fun TasksScreen(
                     FilterChip(
                         selected = true,
                         onClick = { viewModel.selectFilter(TaskFilter.ALL) },
-                        label = { Text("${selectedFilter.label} ×") }
+                        label = {
+                            Text(
+                                stringResource(
+                                    R.string.task_filter_selected_chip,
+                                    stringResource(selectedFilter.labelRes)
+                                )
+                            )
+                        }
                     )
                 }
             }
@@ -333,7 +340,13 @@ fun TasksScreen(
                     reminderAt = null
                 },
                 title = {
-                    Text(if (editingTask == null) "Новая задача" else "Редактировать задачу")
+                    Text(
+                        if (editingTask == null) {
+                            stringResource(R.string.task_new_title)
+                        } else {
+                            stringResource(R.string.task_edit_title)
+                        }
+                    )
                 },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -354,7 +367,7 @@ fun TasksScreen(
                                 onClick = { isUrgent = !isUrgent },
                                 label = {
                                     Text(
-                                        "Срочно",
+                                        stringResource(R.string.task_urgent),
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = TextAlign.Center
                                     )
@@ -373,7 +386,7 @@ fun TasksScreen(
                                 onClick = { isImportant = !isImportant },
                                 label = {
                                     Text(
-                                        "Важно",
+                                        stringResource(R.string.task_important),
                                         modifier = Modifier.fillMaxWidth(),
                                         textAlign = TextAlign.Center
                                     )
@@ -389,13 +402,14 @@ fun TasksScreen(
                         }
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             Text(
-                                text = "Напоминание",
+                                text = stringResource(R.string.task_reminder_label),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
-                                text = reminderAt?.let { "Напомнить: ${formatReminderAt(it)}" }
-                                    ?: "Напоминание не задано",
+                                text = reminderAt?.let {
+                                    stringResource(R.string.task_reminder_at, formatReminderAt(it))
+                                } ?: stringResource(R.string.task_reminder_not_set),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -411,11 +425,17 @@ fun TasksScreen(
                                         )
                                     }
                                 ) {
-                                    Text(if (reminderAt == null) "Выбрать" else "Изменить")
+                                    Text(
+                                        if (reminderAt == null) {
+                                            stringResource(R.string.action_select)
+                                        } else {
+                                            stringResource(R.string.action_change)
+                                        }
+                                    )
                                 }
                                 if (reminderAt != null) {
                                     TextButton(onClick = { reminderAt = null }) {
-                                        Text("Очистить")
+                                        Text(stringResource(R.string.action_clear))
                                     }
                                 }
                             }
@@ -453,7 +473,7 @@ fun TasksScreen(
                         )
                     ) {
                         Text(
-                            stringResource(R.string.save_task)
+                            stringResource(R.string.action_save)
                         )
                     }
                 },
@@ -467,7 +487,7 @@ fun TasksScreen(
                             reminderAt = null
                         }
                     ) {
-                        Text(stringResource(R.string.cancel_button))
+                        Text(stringResource(R.string.action_cancel))
                     }
                 }
             )
@@ -475,7 +495,7 @@ fun TasksScreen(
         //Диалоговое окно на удаление задачи
         if (showDeleteDialog && taskToDelete != null) {
             DeleteConfirmationDialog(
-                title = "Удалить задачу?",
+                title = stringResource(R.string.task_delete_title),
                 onConfirm = {
                     viewModel.deleteTask(taskToDelete!!.id)
                     showDeleteDialog = false
@@ -542,8 +562,8 @@ private fun TasksEmptyState(
         ) {
             Text(
                 text = when {
-                    isSearching -> "Ничего не найдено"
-                    isFiltered -> "Нет задач для выбранного фильтра"
+                    isSearching -> stringResource(R.string.empty_search_results)
+                    isFiltered -> stringResource(R.string.empty_tasks_filtered)
                     else -> stringResource(R.string.tasks_empty_title)
                 },
                 style = MaterialTheme.typography.titleMedium,
@@ -551,7 +571,11 @@ private fun TasksEmptyState(
             )
             if (!isSearching) {
                 Text(
-                    text = if (isFiltered) "Выберите другой фильтр или добавьте новую задачу" else stringResource(R.string.tasks_empty_subtitle),
+                    text = if (isFiltered) {
+                        stringResource(R.string.empty_tasks_filtered_subtitle)
+                    } else {
+                        stringResource(R.string.tasks_empty_subtitle)
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -575,7 +599,7 @@ fun TasksControlsMenu(
         IconButton(onClick = { onExpandedChange(true) }) {
             Icon(
                 imageVector = Icons.Default.MoreVert,
-                contentDescription = "Настройки отображения",
+                contentDescription = stringResource(R.string.content_description_display_settings),
                 tint = MaterialTheme.colorScheme.onPrimary
             )
         }
@@ -584,14 +608,14 @@ fun TasksControlsMenu(
             onDismissRequest = { onExpandedChange(false) }
         ) {
             Text(
-                text = "Вид",
+                text = stringResource(R.string.tasks_controls_view),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
             TasksDisplayMode.entries.forEach { mode ->
                 DropdownMenuItem(
-                    text = { Text(mode.label) },
+                    text = { Text(stringResource(mode.labelRes)) },
                     leadingIcon = {
                         Icon(
                             imageVector = mode.icon(),
@@ -605,14 +629,14 @@ fun TasksControlsMenu(
                 )
             }
             Text(
-                text = "Фильтр",
+                text = stringResource(R.string.tasks_controls_filter),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
             )
             TaskFilter.entries.forEach { filter ->
                 DropdownMenuItem(
-                    text = { Text(filter.label) },
+                    text = { Text(stringResource(filter.labelRes)) },
                     onClick = {
                         onFilterSelected(filter)
                         onExpandedChange(false)
@@ -661,7 +685,7 @@ fun SearchTextField(
             IconButton(onClick = onClose) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Закрыть поиск",
+                    contentDescription = stringResource(R.string.content_description_close_search),
                     tint = headerContentColor
                 )
             }

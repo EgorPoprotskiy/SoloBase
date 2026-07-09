@@ -31,16 +31,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.annotation.StringRes
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import com.egorpoprotskiy.solobase.R
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.domain.models.TaskStatus
 import com.egorpoprotskiy.solobase.ui.tasks.components.TaskReminderText
@@ -137,7 +140,11 @@ private fun KanbanColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "${column.title} (${tasks.size})",
+                text = stringResource(
+                    R.string.kanban_column_title,
+                    stringResource(column.titleRes),
+                    tasks.size
+                ),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -255,7 +262,7 @@ private fun KanbanTaskCard(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.content_description_move_left),
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -266,7 +273,7 @@ private fun KanbanTaskCard(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
+                            contentDescription = stringResource(R.string.content_description_move_right),
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -278,14 +285,14 @@ private fun KanbanTaskCard(
 
 private data class KanbanColumnInfo(
     val status: TaskStatus,
-    val title: String
+    @param:StringRes val titleRes: Int
 )
 
 private val kanbanColumns = listOf(
-    KanbanColumnInfo(TaskStatus.BACKLOG, "Backlog"),
-    KanbanColumnInfo(TaskStatus.TODO, "To Do"),
-    KanbanColumnInfo(TaskStatus.IN_PROGRESS, "In Progress"),
-    KanbanColumnInfo(TaskStatus.DONE, "Done")
+    KanbanColumnInfo(TaskStatus.BACKLOG, R.string.kanban_backlog),
+    KanbanColumnInfo(TaskStatus.TODO, R.string.kanban_todo),
+    KanbanColumnInfo(TaskStatus.IN_PROGRESS, R.string.kanban_in_progress),
+    KanbanColumnInfo(TaskStatus.DONE, R.string.kanban_done)
 )
 
 private fun previousStatus(status: TaskStatus): TaskStatus? {

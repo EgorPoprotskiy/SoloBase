@@ -9,15 +9,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.egorpoprotskiy.solobase.R
 
 @Composable
 fun DeleteConfirmationDialog(
     title: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    confirmText: String = "Удалить",
-    dismissText: String = "Отмена"
+    confirmText: String? = null,
+    dismissText: String? = null
 ) {
+    val resolvedConfirmText = confirmText ?: stringResource(R.string.action_delete)
+    val resolvedDismissText = dismissText ?: stringResource(R.string.action_cancel)
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -28,11 +33,11 @@ fun DeleteConfirmationDialog(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 TextButton(onClick = onDismiss) {
-                    Text(dismissText)
+                    Text(resolvedDismissText)
                 }
                 TextButton(onClick = onConfirm) {
                     Text(
-                        text = confirmText,
+                        text = resolvedConfirmText,
                         color = MaterialTheme.colorScheme.error
                     )
                 }
