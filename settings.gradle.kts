@@ -24,4 +24,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "SoloBase"
 include(":app")
- 

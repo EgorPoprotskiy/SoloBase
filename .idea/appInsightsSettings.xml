@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.egorpoprotskiy.solobase" />
+                  <option name="mobileSdkAppId" value="1:6962736634:android:61febbf637eec53b088843" />
+                  <option name="projectId" value="solobase-bca5f" />
+                  <option name="projectNumber" value="6962736634" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

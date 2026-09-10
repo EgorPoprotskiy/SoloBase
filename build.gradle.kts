@@ -9,5 +9,6 @@ plugins {
     alias(libs.plugins.hilt.android) apply false
     //✅Serialization
     alias(libs.plugins.kotlin.serialization) apply false
-
+    // Firebase
+    alias(libs.plugins.google.services) apply false
 }

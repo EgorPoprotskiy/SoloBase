@@ -7,7 +7,8 @@ plugins {
     alias(libs.plugins.hilt.android)
     //✅Serialization
     alias(libs.plugins.kotlin.serialization)
-
+    // Firebase
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -103,4 +104,6 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+    // Firebase
+    implementation(platform(libs.firebase.bom))
 }
