@@ -49,6 +49,7 @@ class AuthViewModel @Inject constructor(
                 email = event.email
             )
             AuthUiEvent.ClearError -> clearError()
+            AuthUiEvent.ClearSuccessMessage -> clearSuccessMessage()
         }
     }
     //Выполняет вход пользователя.
@@ -114,15 +115,22 @@ class AuthViewModel @Inject constructor(
             sendPasswordResetEmailUseCase(email).onSuccess {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = null
+                    errorMessage = null,
+                    successMessage = "Password reset email sent"
                 )
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = error.message
+                    errorMessage = error.message,
+                    successMessage = null
                 )
             }
         }
+    }
+    private fun clearSuccessMessage() {
+        _uiState.value = _uiState.value.copy(
+            successMessage = null
+        )
     }
     //Очищает сообщение об ошибке.
     private fun clearError() {

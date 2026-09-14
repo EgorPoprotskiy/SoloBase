@@ -43,7 +43,8 @@ fun AuthScreen(
         AuthForm(
             isLoading = uiState.isLoading,
             errorMessage = uiState.errorMessage,
-            onEvent = viewModel::onEvent
+            onEvent = viewModel::onEvent,
+            successMessage = uiState.successMessage
         )
         if (uiState.isLoading) {
             CircularProgressIndicator(

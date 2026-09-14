@@ -24,4 +24,5 @@ sealed interface AuthUiEvent {
     ): AuthUiEvent
     //Пользователь закрывает отображённую ошибку.
     data object ClearError: AuthUiEvent
+    data object ClearSuccessMessage: AuthUiEvent
 }

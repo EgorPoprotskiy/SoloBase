@@ -23,7 +23,8 @@ import com.egorpoprotskiy.solobase.ui.auth.AuthUiEvent
 fun AuthForm(
     isLoading: Boolean,
     errorMessage: String?,
-    onEvent: (AuthUiEvent) -> Unit
+    onEvent: (AuthUiEvent) -> Unit,
+    successMessage: String?
 ) {
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
@@ -75,6 +76,10 @@ fun AuthForm(
             Text(
                 text = errorMessage
             )
+        }
+        if (successMessage != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = successMessage)
         }
     }
 }
