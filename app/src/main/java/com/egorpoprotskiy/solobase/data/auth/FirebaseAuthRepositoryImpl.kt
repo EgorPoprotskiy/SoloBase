@@ -1,8 +1,11 @@
 package com.egorpoprotskiy.solobase.data.auth
 
+import com.egorpoprotskiy.solobase.domain.models.AuthError
+import com.egorpoprotskiy.solobase.domain.models.AuthException
 import com.egorpoprotskiy.solobase.domain.models.User
 import com.egorpoprotskiy.solobase.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await
 
@@ -32,7 +35,7 @@ class FirebaseAuthRepositoryImpl (
                 )
             Result.success(firebaseUser.toDomainUser())
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(mapAuthException(e))
         }
     }
     //Выполняет вход существующего пользователя через Firebase.
@@ -50,7 +53,7 @@ class FirebaseAuthRepositoryImpl (
                 )
             Result.success(firebaseUser.toDomainUser())
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(mapAuthException(e))
         }
     }
     //Завершает текущую Firebase-сессию.
@@ -67,7 +70,7 @@ class FirebaseAuthRepositoryImpl (
             auth.sendPasswordResetEmail(email).await()
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(e)
+            Result.failure(mapAuthException(e))
         }
     }
     //Преобразует FirebaseUser в domain-модель User. Благодаря этому FirebaseUser не выходит за пределы data-слоя.
@@ -76,5 +79,18 @@ class FirebaseAuthRepositoryImpl (
             id = uid,
             email = email.orEmpty()
         )
+    }
+}
+
+/**
+ * Преобразует исключение Firebase в AuthException.
+ */
+private fun mapAuthException(exception: Exception): AuthException {
+    return if (exception is FirebaseAuthException) {
+        AuthException(
+            FirebaseAuthErrorMapper.map(exception)
+        )
+    } else {
+        AuthException(AuthError.Unknown)
     }
 }

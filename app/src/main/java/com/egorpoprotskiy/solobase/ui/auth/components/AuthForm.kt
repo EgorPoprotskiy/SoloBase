@@ -41,6 +41,7 @@ fun AuthForm(
         )
         Spacer(modifier = Modifier.height(8.dp))
         TextField(
+            modifier = Modifier.fillMaxWidth(),
             value = password,
             onValueChange = { password = it },
             label = { Text("Password") },

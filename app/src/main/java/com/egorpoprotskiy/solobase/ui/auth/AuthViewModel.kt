@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.egorpoprotskiy.solobase.domain.models.AuthError
+import com.egorpoprotskiy.solobase.domain.models.AuthException
 
 /**
  * ViewModel экрана авторизации.
@@ -66,12 +68,13 @@ class AuthViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     currentUser = user,
-                    errorMessage = null
+                    errorMessage = null,
+                    successMessage = null
                 )
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = error.message
+                    errorMessage = getErrorMessage(error)
                 )
             }
         }
@@ -90,12 +93,14 @@ class AuthViewModel @Inject constructor(
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     currentUser = user,
-                    errorMessage = null
+                    errorMessage = null,
+                    successMessage = null
+
                 )
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = error.message
+                    errorMessage = getErrorMessage(error)
                 )
             }
         }
@@ -121,7 +126,7 @@ class AuthViewModel @Inject constructor(
             }.onFailure { error ->
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    errorMessage = error.message,
+                    errorMessage = getErrorMessage(error),
                     successMessage = null
                 )
             }
@@ -143,5 +148,39 @@ class AuthViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(
             isLoading = isLoading
         )
+    }
+}
+/**
+ * Преобразует ошибку domain-слоя в понятное сообщение для UI.
+ *
+ * ViewModel не знает ничего о Firebase.
+ */
+private fun getErrorMessage(exception: Throwable): String {
+    val authError = (exception as? AuthException)?.error
+
+    return when (authError) {
+        AuthError.InvalidEmail ->
+            "Некорректный email"
+
+        AuthError.WeakPassword ->
+            "Слишком слабый пароль"
+
+        AuthError.WrongCredentials ->
+            "Неверный email или пароль"
+
+        AuthError.EmailAlreadyInUse ->
+            "Этот email уже зарегистрирован"
+
+        AuthError.TooManyRequests ->
+            "Слишком много попыток. Попробуйте позже"
+
+        AuthError.NetworkError ->
+            "Ошибка сети. Проверьте подключение к интернету"
+
+        AuthError.Unknown ->
+            "Не удалось выполнить операцию"
+
+        null ->
+            "Не удалось выполнить операцию"
     }
 }
