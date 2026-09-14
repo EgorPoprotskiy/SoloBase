@@ -98,12 +98,14 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)   // Для collectAsStateWithLifecycle() - это безопаснее для памяти
     //✅Icon - набор иконок от Google - много весит(не всегда нужен)
     implementation(libs.androidx.material.icons.extended)
-    //✅ Библиотека для работы с шрифтами от Google
+    //✅ Библиотека для работы со шрифтами от Google
     implementation(libs.androidx.compose.ui.text.google.fonts)
     //✅ Room (также должна быть зависимость KSP)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
-    // Firebase
+    //✅Firebase
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
+    implementation(libs.kotlinx.coroutines.play.services)
 }
