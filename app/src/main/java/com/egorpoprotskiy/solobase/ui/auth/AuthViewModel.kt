@@ -16,6 +16,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.egorpoprotskiy.solobase.domain.models.AuthError
 import com.egorpoprotskiy.solobase.domain.models.AuthException
+import com.egorpoprotskiy.solobase.domain.usecase.auth.ObserveAuthStateUseCase
+import kotlinx.coroutines.flow.update
 
 /**
  * ViewModel экрана авторизации.
@@ -30,11 +32,25 @@ class AuthViewModel @Inject constructor(
     private val registerUseCase: RegisterUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val sendPasswordResetEmailUseCase: SendPasswordResetEmailUseCase,
-    private val getCurrentUserUseCase: GetCurrentUserUseCase
+    private val getCurrentUserUseCase: GetCurrentUserUseCase,
+    private val observeAuthStateUseCase: ObserveAuthStateUseCase
 ): ViewModel() {
-    private val _uiState = MutableStateFlow(AuthUiState(currentUser = getCurrentUserUseCase()))
+//    private val _uiState = MutableStateFlow(AuthUiState(currentUser = getCurrentUserUseCase()))
+    private val _uiState = MutableStateFlow(AuthUiState())
     //Публичное состояние, доступное Compose UI только для чтения.
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            observeAuthStateUseCase().collect { user ->
+                _uiState.update {
+                    it.copy(
+                        currentUser = user
+                    )
+                }
+            }
+        }
+    }
     //Обрабатывает события от AuthScreen.
     fun onEvent(event: AuthUiEvent) {
         when (event) {

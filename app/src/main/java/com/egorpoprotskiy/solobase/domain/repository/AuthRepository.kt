@@ -1,6 +1,8 @@
 package com.egorpoprotskiy.solobase.domain.repository
 
 import com.egorpoprotskiy.solobase.domain.models.User
+import kotlinx.coroutines.flow.Flow
+
 /**
  * Абстракция авторизации для domain-слоя.
  * Реализация будет находиться в data/auth и использовать Firebase Authentication.
@@ -23,7 +25,10 @@ interface AuthRepository {
 
     //Возвращает текущего авторизованного пользователя, либо null, если пользователь не авторизован.
     fun getCurrentUser(): User?
-
+    /**
+     * Наблюдает за изменением состояния авторизации.
+     */
+    fun observeAuthState(): Flow<User?>
     //Отправляет письмо для восстановления пароля.
     suspend fun sendPasswordResetEmail(
         email: String

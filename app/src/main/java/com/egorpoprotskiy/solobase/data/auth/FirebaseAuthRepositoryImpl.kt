@@ -8,6 +8,10 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.tasks.await
+import com.google.firebase.auth.FirebaseAuth.AuthStateListener
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 /**
  * Firebase-реализация AuthRepository.
@@ -80,6 +84,25 @@ class FirebaseAuthRepositoryImpl (
             email = email.orEmpty()
         )
     }
+    /**
+     * Наблюдает за изменением состояния Firebase Authentication.
+     *
+     * Flow получает нового пользователя при входе, выходе
+     * или другом изменении состояния Firebase-сессии.
+     */
+    override fun observeAuthState(): Flow<User?> = callbackFlow {
+        val listener = AuthStateListener { firebaseAuth ->
+            trySend(
+                firebaseAuth.currentUser?.toDomainUser()
+            )
+        }
+
+        auth.addAuthStateListener(listener)
+
+        awaitClose {
+            auth.removeAuthStateListener(listener)
+        }
+    }
 }
 
 /**
@@ -94,3 +117,4 @@ private fun mapAuthException(exception: Exception): AuthException {
         AuthException(AuthError.Unknown)
     }
 }
+
