@@ -47,6 +47,10 @@ fun RootScreen(viewModel: AuthViewModel = hiltViewModel()) {
             viewModel = viewModel
         )
     } else {
-        MainScreen()
+        MainScreen(
+            onLogout = {
+                viewModel.onEvent(AuthUiEvent.Logout)
+            }
+        )
     }
 }

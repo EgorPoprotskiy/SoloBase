@@ -16,6 +16,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -54,6 +55,7 @@ import com.egorpoprotskiy.solobase.ui.tasks.TasksScreen
 
 @Composable
 fun MainScreen(
+    onLogout:() -> Unit,
     taskViewModel: TaskViewModel = hiltViewModel(),
     projectNotesViewModel: ProjectNotesViewModel = hiltViewModel(),
     projectViewModel: ProjectViewModel = hiltViewModel()
@@ -120,6 +122,26 @@ fun MainScreen(
                         )
                     )
                 }
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onLogout,
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Logout,
+                            contentDescription = "Logout"
+                        )
+                    },
+                    label = {
+                        Text("Logout")
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.secondary,
+                        selectedTextColor = MaterialTheme.colorScheme.secondary,
+                        indicatorColor = MaterialTheme.colorScheme.secondaryContainer,
+                        unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
             }
         }
     ) { paddingValues ->
