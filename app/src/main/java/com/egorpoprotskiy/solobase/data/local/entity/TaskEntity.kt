@@ -20,6 +20,6 @@ data class TaskEntity(
     val tagId: String? = null,
     val isCompleted: Boolean = false,
     val projectId: String? = null,
-    val updateAt: Long = System.currentTimeMillis(),
-    val deleteAt: Long? = null
+    val updatedAt: Long = System.currentTimeMillis(),
+    val deletedAt: Long? = null
 )

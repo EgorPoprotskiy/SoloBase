@@ -9,8 +9,8 @@ fun ProjectEntity.toDomain(): Project = Project(
     description = description,
     colorHex = colorHex,
     createdAt = createdAt,
-    updateAt = updateAt,
-    deleteAt = deleteAt
+    updatedAt = updatedAt,
+    deletedAt = deletedAt
 )
 
 fun Project.toEntity(): ProjectEntity = ProjectEntity(
@@ -19,6 +19,6 @@ fun Project.toEntity(): ProjectEntity = ProjectEntity(
     description = description,
     colorHex = colorHex,
     createdAt = createdAt,
-    updateAt = updateAt,
-    deleteAt = deleteAt
+    updatedAt = updatedAt,
+    deletedAt = deletedAt
 )

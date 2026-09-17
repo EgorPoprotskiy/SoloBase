@@ -16,8 +16,8 @@ fun TaskEntity.toDomain(): Task = Task(
     tagId = tagId,
     isCompleted = isCompleted,
     projectId = projectId,
-    updateAt = updateAt,
-    deleteAt = deleteAt
+    updatedAt = updatedAt,
+    deletedAt = deletedAt
 )
 
 fun Task.toEntity(): TaskEntity = TaskEntity(
@@ -33,6 +33,6 @@ fun Task.toEntity(): TaskEntity = TaskEntity(
     tagId = tagId,
     isCompleted = isCompleted,
     projectId = projectId,
-    updateAt = updateAt,
-    deleteAt = deleteAt
+    updatedAt = updatedAt,
+    deletedAt = deletedAt
 )

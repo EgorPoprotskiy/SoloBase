@@ -13,6 +13,6 @@ data class ProjectEntity(
     val description: String = "",
     val colorHex: String = ProjectDefaults.DEFAULT_COLOR_HEX,
     val createdAt: Long = System.currentTimeMillis(),
-    val updateAt: Long = System.currentTimeMillis(),
-    val deleteAt: Long? = null
+    val updatedAt: Long = System.currentTimeMillis(),
+    val deletedAt: Long? = null
 )
