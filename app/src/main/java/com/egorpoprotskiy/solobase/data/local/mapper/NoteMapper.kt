@@ -8,7 +8,9 @@ fun NoteEntity.toDomain(): Note = Note(
     projectId = projectId,
     content = content,
     timestamp = timestamp,
-    colorHex = colorHex
+    colorHex = colorHex,
+    updateAt = updateAt,
+    deleteAt = deleteAt
 )
 
 fun Note.toEntity(): NoteEntity = NoteEntity(
@@ -16,5 +18,7 @@ fun Note.toEntity(): NoteEntity = NoteEntity(
     projectId = projectId,
     content = content,
     timestamp = timestamp,
-    colorHex = colorHex
+    colorHex = colorHex,
+    updateAt = updateAt,
+    deleteAt = deleteAt
 )

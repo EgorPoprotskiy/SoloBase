@@ -7,5 +7,7 @@ data class Project(
     val name: String,                              // Название проекта (например, "SoloBase App")
     val description: String = "",                  // Краткое описание, о чем этот проект
     val colorHex: String = ProjectDefaults.DEFAULT_COLOR_HEX, // Цвет обложки или иконки проекта
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val updateAt: Long = System.currentTimeMillis(),
+    val deleteAt: Long? = null
 )

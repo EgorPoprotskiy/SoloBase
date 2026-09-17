@@ -18,7 +18,9 @@ data class Task (
     val position: Int = 0,
     val tagId: String? = null,             // Привязка к цветному тегу
     val isCompleted: Boolean = false,
-    val projectId: String? = null             // Привязка к проекту (для 3-го экрана)
+    val projectId: String? = null,             // Привязка к проекту (для 3-го экрана)
+    val updateAt: Long = System.currentTimeMillis(),
+    val deleteAt: Long? = null
 )
 
 enum class TaskCategory {

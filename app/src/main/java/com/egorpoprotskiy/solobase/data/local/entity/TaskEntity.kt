@@ -19,5 +19,7 @@ data class TaskEntity(
     val position: Int = 0,
     val tagId: String? = null,
     val isCompleted: Boolean = false,
-    val projectId: String? = null
+    val projectId: String? = null,
+    val updateAt: Long = System.currentTimeMillis(),
+    val deleteAt: Long? = null
 )

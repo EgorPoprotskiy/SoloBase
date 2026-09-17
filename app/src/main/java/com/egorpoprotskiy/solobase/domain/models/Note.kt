@@ -5,5 +5,7 @@ data class Note(
     val projectId: String,
     val content: String,          // Текст заметки
     val timestamp: Long = System.currentTimeMillis(),
-    val colorHex: String? = null    // Можно задать цвет самой карточке заметки
+    val colorHex: String? = null,    // Можно задать цвет самой карточке заметки
+    val updateAt: Long = System.currentTimeMillis(),
+    val deleteAt: Long? = null
 )

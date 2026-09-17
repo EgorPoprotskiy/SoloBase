@@ -11,5 +11,7 @@ data class NoteEntity(
     val projectId: String,
     val content: String,
     val timestamp: Long = System.currentTimeMillis(),
-    val colorHex: String? = null
+    val colorHex: String? = null,
+    val updateAt: Long = System.currentTimeMillis(),
+    val deleteAt: Long? = null
 )
