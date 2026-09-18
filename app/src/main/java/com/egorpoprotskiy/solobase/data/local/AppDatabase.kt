@@ -10,7 +10,7 @@ import com.egorpoprotskiy.solobase.data.local.entity.NoteEntity
 import com.egorpoprotskiy.solobase.data.local.entity.ProjectEntity
 import com.egorpoprotskiy.solobase.data.local.entity.TaskEntity
 
-@Database(entities = [TaskEntity::class, ProjectEntity::class, NoteEntity::class], version = 4, exportSchema = false)
+@Database(entities = [TaskEntity::class, ProjectEntity::class, NoteEntity::class], version = 5, exportSchema = false)
 @TypeConverters(TaskConverters::class) // Подключаем наши конвертеры для Enum
 abstract class AppDatabase: RoomDatabase() {
     abstract fun taskDao(): TaskDao

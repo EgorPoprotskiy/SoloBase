@@ -23,25 +23,6 @@ import com.egorpoprotskiy.solobase.ui.MainScreen
 @Composable
 fun RootScreen(viewModel: AuthViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-//    when {
-//        uiState.isLoading -> {
-//            Box(
-//                modifier = Modifier.fillMaxSize(),
-//                contentAlignment = Alignment.Center
-//            ) {
-//                CircularProgressIndicator()
-//            }
-//        }
-//        uiState.currentUser == null -> {
-//            AuthScreen(
-//                uiState = uiState,
-//                onEvent = viewModel::onEvent
-//            )
-//        }
-//        else -> {
-//            MainScreen()
-//        }
-//    }
     if (uiState.currentUser == null) {
         AuthScreen(
             viewModel = viewModel

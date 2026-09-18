@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import com.egorpoprotskiy.solobase.data.remote.firestore.model.FirestoreProject
+import javax.inject.Inject
 
 /* Удаленный репозиторий для проектов, хранящихся в облачном Firestore.
 *
@@ -21,7 +22,7 @@ import com.egorpoprotskiy.solobase.data.remote.firestore.model.FirestoreProject
 * Этот репозиторий отвечает только за взаимодействие с Firestore.
 * Локальная синхронизация в помещении будет подключена позже.
  */
-class FirestoreProjectRepositoryImpl (
+class FirestoreProjectRepositoryImpl @Inject constructor (
     private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth
 ): FirestoreProjectRepository {
