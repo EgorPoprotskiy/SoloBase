@@ -1,6 +1,7 @@
 package com.egorpoprotskiy.solobase.di
 
 import com.egorpoprotskiy.solobase.data.reminder.AndroidTaskReminderScheduler
+import com.egorpoprotskiy.solobase.data.remote.firestore.repository.FirestoreProjectRepositoryImpl
 import com.egorpoprotskiy.solobase.data.repository.NoteRepositoryImpl
 import com.egorpoprotskiy.solobase.data.repository.ProjectRepositoryImpl
 import com.egorpoprotskiy.solobase.data.repository.TaskRepositoryImpl
@@ -8,6 +9,7 @@ import com.egorpoprotskiy.solobase.domain.reminder.TaskReminderScheduler
 import com.egorpoprotskiy.solobase.domain.repository.NoteRepository
 import com.egorpoprotskiy.solobase.domain.repository.ProjectRepository
 import com.egorpoprotskiy.solobase.domain.repository.TaskRepository
+import com.egorpoprotskiy.solobase.domain.repository.remote.FirestoreProjectRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -40,4 +42,10 @@ abstract class RepositoryModule {
     abstract fun bindTaskReminderScheduler(
         androidTaskReminderScheduler: AndroidTaskReminderScheduler
     ): TaskReminderScheduler
+
+    @Binds
+    @Singleton
+    abstract fun bindFirestoreProjectRepository(
+        firestoreProjectRepositoryImpl: FirestoreProjectRepositoryImpl
+    ): FirestoreProjectRepository
 }

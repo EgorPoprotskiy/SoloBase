@@ -4,6 +4,7 @@ import android.content.Context
 import com.egorpoprotskiy.solobase.data.auth.FirebaseAuthRepositoryImpl
 import com.egorpoprotskiy.solobase.domain.repository.AuthRepository
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,5 +30,11 @@ object AuthModule {
     @Singleton
     fun provideAuthRepository(auth: FirebaseAuth): AuthRepository{
         return FirebaseAuthRepositoryImpl(auth)
+    }
+    // Предоставляет FirebaseFirestore для удаленных хранилищ данных.
+    @Provides
+    @Singleton
+    fun provideFirebaseFirestore(): FirebaseFirestore {
+        return FirebaseFirestore.getInstance()
     }
 }
