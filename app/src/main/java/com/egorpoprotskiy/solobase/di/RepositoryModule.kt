@@ -15,6 +15,8 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import com.egorpoprotskiy.solobase.data.remote.firestore.repository.FirestoreTaskRepositoryImpl
+import com.egorpoprotskiy.solobase.domain.repository.remote.FirestoreTaskRepository
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -48,4 +50,10 @@ abstract class RepositoryModule {
     abstract fun bindFirestoreProjectRepository(
         firestoreProjectRepositoryImpl: FirestoreProjectRepositoryImpl
     ): FirestoreProjectRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFirestoreTaskRepository(
+        implementation: FirestoreTaskRepositoryImpl
+    ): FirestoreTaskRepository
 }
