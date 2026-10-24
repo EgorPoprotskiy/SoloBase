@@ -23,7 +23,6 @@ fun RootScreen(viewModel: AuthViewModel = hiltViewModel()) {
             viewModel = viewModel
         )
     } else {
-//        FirestoreTestScreen()
         MainScreen(
             onLogout = {
                 viewModel.onEvent(AuthUiEvent.Logout)
