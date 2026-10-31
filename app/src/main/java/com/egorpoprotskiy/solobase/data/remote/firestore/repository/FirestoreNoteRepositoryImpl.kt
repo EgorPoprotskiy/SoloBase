@@ -4,6 +4,7 @@ package com.egorpoprotskiy.solobase.data.remote.firestore.repository
 import com.egorpoprotskiy.solobase.data.remote.firestore.mapper.toDomain
 import com.egorpoprotskiy.solobase.data.remote.firestore.mapper.toFirestore
 import com.egorpoprotskiy.solobase.data.remote.firestore.model.FirestoreNote
+import com.egorpoprotskiy.solobase.data.remote.sync.FirestoreSyncResult
 import com.egorpoprotskiy.solobase.domain.models.Note
 import com.egorpoprotskiy.solobase.domain.repository.remote.FirestoreNoteRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import com.google.firebase.firestore.Source
 
 /**
  * Реализация облачного хранилища заметок через Cloud Firestore.
@@ -61,22 +63,42 @@ class FirestoreNoteRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveNote(note: Note): Result<Unit> = try {
-        val uid = auth.currentUser?.uid
-            ?: return Result.failure(
-                IllegalStateException("User is not authenticated")
-            )
+    override suspend fun saveNote(
+        note: Note
+    ): Result<FirestoreSyncResult<Note>> {
+        return try {
+            val uid = auth.currentUser?.uid
+                ?: throw IllegalStateException("User is not authenticated")
 
-        firestore.collection("users")
-            .document(uid)
-            .collection("notes")
-            .document(note.id)
-            .set(note.toFirestore())
-            .await()
+            val documentRef = firestore
+                .collection(USERS_COLLECTION)
+                .document(uid)
+                .collection(NOTE_COLLECTION)
+                .document(note.id)
 
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
+            val result = firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(documentRef)
+
+                val remoteNote = snapshot
+                    .toObject(FirestoreNote::class.java)
+                    ?.toDomain(snapshot.id)
+
+                // При одинаковом updatedAt побеждает Firestore.
+                if (remoteNote != null &&
+                    remoteNote.updatedAt >= note.updatedAt
+                ) {
+                    return@runTransaction FirestoreSyncResult.RemoteNewer(remoteNote)
+                }
+
+                transaction.set(documentRef, note.toFirestore())
+
+                FirestoreSyncResult.Uploaded
+            }.await()
+
+            Result.success(result)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
 
@@ -106,4 +128,31 @@ class FirestoreNoteRepositoryImpl @Inject constructor(
         Result.failure(e)
     }
 
+    override suspend fun getAllNotesFromServer(): Result<List<Note>> {
+        return try {
+            val uid = auth.currentUser?.uid
+                ?: throw IllegalStateException("User is not authenticated")
+            // Получаем актуальные данные непосредственно с сервера Firestore.
+            val snapshot = firestore
+                .collection(USERS_COLLECTION)
+                .document(uid)
+                .collection(NOTE_COLLECTION)
+                .get(Source.SERVER)
+                .await()
+
+            // Преобразуем документы Firestore в доменные модели Note.
+            val items = snapshot.documents.mapNotNull { document ->
+                document.toObject(FirestoreNote::class.java)
+                    ?.toDomain(document.id)
+            }
+
+            Result.success(items)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    private companion object {
+        const val USERS_COLLECTION = "users"
+        const val NOTE_COLLECTION = "notes"
+    }
 }

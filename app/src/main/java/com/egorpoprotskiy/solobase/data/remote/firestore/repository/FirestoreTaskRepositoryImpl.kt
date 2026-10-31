@@ -4,6 +4,7 @@ package com.egorpoprotskiy.solobase.data.remote.firestore.repository
 import com.egorpoprotskiy.solobase.data.remote.firestore.mapper.toDomain
 import com.egorpoprotskiy.solobase.data.remote.firestore.mapper.toFirestore
 import com.egorpoprotskiy.solobase.data.remote.firestore.model.FirestoreTask
+import com.egorpoprotskiy.solobase.data.remote.sync.FirestoreSyncResult
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.domain.repository.remote.FirestoreTaskRepository
 import com.google.firebase.auth.FirebaseAuth
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import com.google.firebase.firestore.Source
 
 /**
  * Реализация облачного репозитория задач.
@@ -65,23 +67,45 @@ class FirestoreTaskRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun saveTask(task: Task): Result<Unit> = try {
-        val uid = auth.currentUser?.uid
-            ?: return Result.failure(
-                IllegalStateException("User is not authenticated")
-            )
+    override suspend fun saveTask(
+        task: Task
+    ): Result<FirestoreSyncResult<Task>> {
+        return try {
+            val uid = auth.currentUser?.uid
+                ?: throw IllegalStateException("User is not authenticated")
 
-        firestore
-            .collection(USERS_COLLECTION)
-            .document(uid)
-            .collection(TASKS_COLLECTION)
-            .document(task.id)
-            .set(task.toFirestore())
-            .await()
+            // Ссылка на документ задачи текущего пользователя.
+            val documentRef = firestore
+                .collection(USERS_COLLECTION)
+                .document(uid)
+                .collection(TASKS_COLLECTION)
+                .document(task.id)
 
-        Result.success(Unit)
-    } catch (e: Exception) {
-        Result.failure(e)
+            // Проверяем облачную версию и записываем локальную,
+            // только если она новее.
+            val result = firestore.runTransaction { transaction ->
+
+                val snapshot = transaction.get(documentRef)
+
+                val remoteTask = snapshot
+                    .toObject(FirestoreTask::class.java)
+                    ?.toDomain(snapshot.id)
+
+                // При равенстве updatedAt приоритет у Firestore.
+                if (remoteTask != null && remoteTask.updatedAt >= task.updatedAt) {
+                    return@runTransaction FirestoreSyncResult.RemoteNewer(remoteTask)
+                }
+
+                // Локальная версия новее — сохраняем её.
+                transaction.set(documentRef, task.toFirestore())
+
+                FirestoreSyncResult.Uploaded
+            }.await()
+
+            Result.success(result)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
 
@@ -112,7 +136,30 @@ class FirestoreTaskRepositoryImpl @Inject constructor(
         Result.failure(e)
     }
 
+    override suspend fun getAllTasksFromServer(): Result<List<Task>> {
+        return try {
+            val uid = auth.currentUser?.uid
+                ?: throw IllegalStateException("User is not authenticated")
 
+            // Получаем актуальные данные непосредственно с сервера Firestore.
+            val snapshot = firestore
+                .collection(USERS_COLLECTION)
+                .document(uid)
+                .collection(TASKS_COLLECTION)
+                .get(Source.SERVER)
+                .await()
+
+            // Преобразуем документы Firestore в доменные модели Task.
+            val tasks = snapshot.documents.mapNotNull { document ->
+                document.toObject(FirestoreTask::class.java)
+                    ?.toDomain(document.id)
+            }
+
+            Result.success(tasks)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
     private companion object {
         const val USERS_COLLECTION = "users"
         const val TASKS_COLLECTION = "tasks"

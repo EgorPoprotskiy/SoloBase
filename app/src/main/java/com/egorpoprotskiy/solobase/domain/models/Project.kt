@@ -9,5 +9,5 @@ data class Project(
     val colorHex: String = ProjectDefaults.DEFAULT_COLOR_HEX, // Цвет обложки или иконки проекта
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
-    val deletedAt: Long? = null
+    val deletedAt: Long? = null,
 )

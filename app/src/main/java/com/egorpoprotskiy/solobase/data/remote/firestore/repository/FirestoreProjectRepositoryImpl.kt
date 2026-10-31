@@ -12,8 +12,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import com.egorpoprotskiy.solobase.data.remote.firestore.model.FirestoreProject
+import com.egorpoprotskiy.solobase.data.remote.sync.FirestoreSyncResult
 import com.google.firebase.firestore.SetOptions
 import javax.inject.Inject
+import com.google.firebase.firestore.Source
 
 /* Удаленный репозиторий для проектов, хранящихся в облачном Firestore.
 *
@@ -71,29 +73,47 @@ class FirestoreProjectRepositoryImpl @Inject constructor (
      *
      * В качестве идентификатора документа Firestore используется существующий project.id.
      */
-    override suspend fun saveProject(project: Project): Result<Unit> {
+    override suspend fun saveProject(
+        project: Project
+    ): Result<FirestoreSyncResult<Project>> {
         return try {
             val uid = auth.currentUser?.uid
-                ?: return Result.failure(
-                    IllegalStateException("User is not authenticated")
-                )
-            firestore
+                ?: throw IllegalStateException("User is not authenticated")
+
+            val documentRef = firestore
                 .collection(USERS_COLLECTION)
                 .document(uid)
                 .collection(PROJECTS_COLLECTION)
                 .document(project.id)
-                .set(project.toFirestore())
-                .await()
-            Result.success(Unit)
+
+            val result = firestore.runTransaction { transaction ->
+                val snapshot = transaction.get(documentRef)
+
+                val remoteProject = snapshot
+                    .toObject(FirestoreProject::class.java)
+                    ?.toDomain(snapshot.id)
+
+                // При одинаковом updatedAt побеждает Firestore.
+                if (remoteProject != null &&
+                    remoteProject.updatedAt >= project.updatedAt
+                ) {
+                    return@runTransaction FirestoreSyncResult.RemoteNewer(remoteProject)
+                }
+
+                transaction.set(documentRef, project.toFirestore())
+
+                FirestoreSyncResult.Uploaded
+            }.await()
+
+            Result.success(result)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     /**
-     * Документ проекта безвозвратно удаляется из Firestore.
-     *
-     * Синхронизация с программным удалением будет реализована позже.
+     * Помечает проект удалённым в Firestore с помощью tombstone.
+     * Документ сохраняется для корректной синхронизации между устройствами.
      */
     override suspend fun deleteProject(projectId: String): Result<Unit> {
         return try {
@@ -118,6 +138,29 @@ class FirestoreProjectRepositoryImpl @Inject constructor (
                 .await()
 
             Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    override suspend fun getAllProjectsFromServer(): Result<List<Project>> {
+        return try {
+            val uid = auth.currentUser?.uid
+                ?: throw IllegalStateException("User is not authenticated")
+            // Получаем актуальные данные непосредственно с сервера Firestore.
+            val snapshot = firestore
+                .collection(USERS_COLLECTION)
+                .document(uid)
+                .collection(PROJECTS_COLLECTION)
+                .get(Source.SERVER)
+                .await()
+
+            // Преобразуем документы Firestore в доменные модели Project.
+            val items = snapshot.documents.mapNotNull { document ->
+                document.toObject(FirestoreProject::class.java)
+                    ?.toDomain(document.id)
+            }
+
+            Result.success(items)
         } catch (e: Exception) {
             Result.failure(e)
         }
