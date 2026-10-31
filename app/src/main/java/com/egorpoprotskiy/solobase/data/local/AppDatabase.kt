@@ -9,8 +9,19 @@ import com.egorpoprotskiy.solobase.data.local.dao.TaskDao
 import com.egorpoprotskiy.solobase.data.local.entity.NoteEntity
 import com.egorpoprotskiy.solobase.data.local.entity.ProjectEntity
 import com.egorpoprotskiy.solobase.data.local.entity.TaskEntity
+import com.egorpoprotskiy.solobase.data.local.dao.SyncStateDao
+import com.egorpoprotskiy.solobase.data.local.entity.SyncStateEntity
 
-@Database(entities = [TaskEntity::class, ProjectEntity::class, NoteEntity::class], version = 5, exportSchema = false)
+@Database(
+    entities = [
+        TaskEntity::class,
+        ProjectEntity::class,
+        NoteEntity::class,
+        SyncStateEntity::class
+    ],
+    version = 7,
+    exportSchema = false
+)
 @TypeConverters(TaskConverters::class) // Подключаем наши конвертеры для Enum
 abstract class AppDatabase: RoomDatabase() {
     abstract fun taskDao(): TaskDao
@@ -19,6 +30,7 @@ abstract class AppDatabase: RoomDatabase() {
     companion object {
         const val DATABASE_NAME = "task_database"
     }
+    abstract fun syncStateDao(): SyncStateDao
 }
 
 // При использовании Hilt, экземпляр БД создается в DatabaseModule.

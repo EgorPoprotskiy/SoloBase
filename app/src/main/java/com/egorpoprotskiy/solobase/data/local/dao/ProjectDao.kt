@@ -10,15 +10,58 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProjectDao {
-    @Query("SELECT * FROM projects ORDER BY createdAt DESC")
+
+    // Поток проектов для UI: удалённые проекты не отображаются.
+    @Query("""
+        SELECT * FROM projects
+        WHERE deletedAt IS NULL
+        ORDER BY createdAt DESC
+    """)
     fun getProjects(): Flow<List<ProjectEntity>>
 
+    // Все проекты, ожидающие отправки в Firestore, включая tombstone-записи.
+    @Query("SELECT * FROM projects WHERE isSynced = 0")
+    suspend fun getUnsyncedProjects(): List<ProjectEntity>
+
+    // Получение проекта по ID, в том числе удалённого.
+    @Query("SELECT * FROM projects WHERE id = :projectId LIMIT 1")
+    suspend fun getProjectById(projectId: String): ProjectEntity?
+
+    // Локальная вставка или замена проекта.
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProject(project: ProjectEntity)
 
+    // Локальное обновление проекта.
     @Update
     suspend fun updateProject(project: ProjectEntity)
 
-    @Query("DELETE FROM projects WHERE id = :projectId")
-    suspend fun deleteProjectById(projectId: String)
+    // Применение данных из Firestore без постановки их в очередь отправки.
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertSyncedProject(project: ProjectEntity)
+
+    // Мягкое удаление проекта.
+    @Query("""
+        UPDATE projects
+        SET deletedAt = :deletedAt,
+            updatedAt = :updatedAt,
+            isSynced = 0
+        WHERE id = :projectId
+    """)
+    suspend fun markProjectDeleted(
+        projectId: String,
+        deletedAt: Long,
+        updatedAt: Long
+    )
+
+    // Подтверждение отправки только той версии, которая была загружена.
+    @Query("""
+        UPDATE projects
+        SET isSynced = 1
+        WHERE id = :projectId
+          AND updatedAt = :uploadedUpdatedAt
+    """)
+    suspend fun markProjectSynced(
+        projectId: String,
+        uploadedUpdatedAt: Long
+    )
 }

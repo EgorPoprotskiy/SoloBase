@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import com.egorpoprotskiy.solobase.data.remote.firestore.model.FirestoreProject
+import com.google.firebase.firestore.SetOptions
 import javax.inject.Inject
 
 /* Удаленный репозиторий для проектов, хранящихся в облачном Firestore.
@@ -100,13 +101,22 @@ class FirestoreProjectRepositoryImpl @Inject constructor (
                 ?: return Result.failure(
                     IllegalStateException("User is not authenticated")
                 )
+
+            val now = System.currentTimeMillis()
+
+            val tombstone = mapOf(
+                "deletedAt" to now,
+                "updatedAt" to now
+            )
+
             firestore
                 .collection(USERS_COLLECTION)
                 .document(uid)
                 .collection(PROJECTS_COLLECTION)
                 .document(projectId)
-                .delete()
+                .set(tombstone, SetOptions.merge())
                 .await()
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

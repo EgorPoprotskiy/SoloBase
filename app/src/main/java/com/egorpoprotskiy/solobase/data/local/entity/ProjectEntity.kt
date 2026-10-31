@@ -2,6 +2,7 @@ package com.egorpoprotskiy.solobase.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.ColumnInfo
 import com.egorpoprotskiy.solobase.domain.models.ProjectDefaults
 import java.util.UUID
 
@@ -14,5 +15,7 @@ data class ProjectEntity(
     val colorHex: String = ProjectDefaults.DEFAULT_COLOR_HEX,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
-    val deletedAt: Long? = null
+    val deletedAt: Long? = null,
+    @ColumnInfo(defaultValue = "1")
+    val isSynced: Boolean = true
 )

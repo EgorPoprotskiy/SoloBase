@@ -9,6 +9,7 @@ import com.egorpoprotskiy.solobase.domain.repository.remote.FirestoreNoteReposit
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -78,6 +79,7 @@ class FirestoreNoteRepositoryImpl @Inject constructor(
         Result.failure(e)
     }
 
+
     override suspend fun deleteNote(noteId: String): Result<Unit> = try {
         val uid = auth.currentUser?.uid
             ?: return Result.failure(
@@ -90,11 +92,12 @@ class FirestoreNoteRepositoryImpl @Inject constructor(
             .document(uid)
             .collection("notes")
             .document(noteId)
-            .update(
+            .set(
                 mapOf(
                     "deletedAt" to now,
                     "updatedAt" to now
-                )
+                ),
+                SetOptions.merge()
             )
             .await()
 
@@ -102,4 +105,5 @@ class FirestoreNoteRepositoryImpl @Inject constructor(
     } catch (e: Exception) {
         Result.failure(e)
     }
+
 }

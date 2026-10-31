@@ -9,6 +9,7 @@ import com.egorpoprotskiy.solobase.domain.repository.remote.FirestoreTaskReposit
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -83,6 +84,7 @@ class FirestoreTaskRepositoryImpl @Inject constructor(
         Result.failure(e)
     }
 
+
     override suspend fun deleteTask(taskId: String): Result<Unit> = try {
         val uid = auth.currentUser?.uid
             ?: return Result.failure(
@@ -96,11 +98,12 @@ class FirestoreTaskRepositoryImpl @Inject constructor(
             .document(uid)
             .collection(TASKS_COLLECTION)
             .document(taskId)
-            .update(
+            .set(
                 mapOf(
                     "deletedAt" to now,
                     "updatedAt" to now
-                )
+                ),
+                SetOptions.merge()
             )
             .await()
 
@@ -108,6 +111,7 @@ class FirestoreTaskRepositoryImpl @Inject constructor(
     } catch (e: Exception) {
         Result.failure(e)
     }
+
 
     private companion object {
         const val USERS_COLLECTION = "users"

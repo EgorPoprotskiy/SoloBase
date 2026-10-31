@@ -2,8 +2,10 @@ package com.egorpoprotskiy.solobase.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.ColumnInfo
 import com.egorpoprotskiy.solobase.domain.models.TaskCategory
 import java.util.UUID
+
 
 @Entity(tableName = "tasks")
 data class TaskEntity(
@@ -21,5 +23,7 @@ data class TaskEntity(
     val isCompleted: Boolean = false,
     val projectId: String? = null,
     val updatedAt: Long = System.currentTimeMillis(),
-    val deletedAt: Long? = null
+    val deletedAt: Long? = null,
+    @ColumnInfo(defaultValue = "1")
+    val isSynced: Boolean = true
 )
