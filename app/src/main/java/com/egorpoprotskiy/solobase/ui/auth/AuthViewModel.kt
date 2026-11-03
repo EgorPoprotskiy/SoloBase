@@ -1,8 +1,10 @@
 package com.egorpoprotskiy.solobase.ui.auth
 
+import android.util.Log
 import androidx.compose.runtime.currentComposer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.egorpoprotskiy.solobase.data.remote.sync.SyncManager
 import com.egorpoprotskiy.solobase.domain.usecase.auth.GetCurrentUserUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.auth.LoginUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.auth.LogoutUseCase
@@ -33,7 +35,8 @@ class AuthViewModel @Inject constructor(
     private val logoutUseCase: LogoutUseCase,
     private val sendPasswordResetEmailUseCase: SendPasswordResetEmailUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
-    private val observeAuthStateUseCase: ObserveAuthStateUseCase
+    private val observeAuthStateUseCase: ObserveAuthStateUseCase,
+    private val syncManager: SyncManager
 ): ViewModel() {
 //    private val _uiState = MutableStateFlow(AuthUiState(currentUser = getCurrentUserUseCase()))
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -47,6 +50,12 @@ class AuthViewModel @Inject constructor(
                     it.copy(
                         currentUser = user
                     )
+                }
+                if (user != null) {
+                    syncManager.sync()
+                        .onFailure { error ->
+                            Log.e("AuthViewModel", "Initial sync failed", error)
+                        }
                 }
             }
         }

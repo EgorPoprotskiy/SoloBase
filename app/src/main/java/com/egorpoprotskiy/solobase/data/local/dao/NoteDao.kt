@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.egorpoprotskiy.solobase.data.local.entity.NoteEntity
 import kotlinx.coroutines.flow.Flow
@@ -66,4 +67,17 @@ interface NoteDao {
         noteId: String,
         uploadedUpdatedAt: Long
     )
+
+    // Все заметки для первоначального объединения с Firestore.
+    @Query("SELECT * FROM notes")
+    suspend fun getAllNotesForSync(): List<NoteEntity>
+
+    @Transaction
+    suspend fun applySyncedNoteIfNewer(note: NoteEntity) {
+        val localNote = getNoteById(note.id)
+
+        if (localNote == null || note.updatedAt >= localNote.updatedAt) {
+            upsertSyncedNote(note.copy(isSynced = true))
+        }
+    }
 }

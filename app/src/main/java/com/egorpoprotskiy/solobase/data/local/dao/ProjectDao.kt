@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.egorpoprotskiy.solobase.data.local.entity.ProjectEntity
 import kotlinx.coroutines.flow.Flow
@@ -64,4 +65,17 @@ interface ProjectDao {
         projectId: String,
         uploadedUpdatedAt: Long
     )
+
+    // Все проекты для первоначального объединения с Firestore.
+    @Query("SELECT * FROM projects")
+    suspend fun getAllProjectsForSync(): List<ProjectEntity>
+
+    @Transaction
+    suspend fun applySyncedProjectIfNewer(project: ProjectEntity) {
+        val localProject = getProjectById(project.id)
+
+        if (localProject == null || project.updatedAt >= localProject.updatedAt) {
+            upsertSyncedProject(project.copy(isSynced = true))
+        }
+    }
 }

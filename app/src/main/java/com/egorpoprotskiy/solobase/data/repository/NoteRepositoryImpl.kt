@@ -33,6 +33,7 @@ class NoteRepositoryImpl @Inject constructor(
 
     override suspend fun updateNote(note: Note) {
         val existing = noteDao.getNoteById(note.id) ?: return
+        if (existing.deletedAt != null) return
         val now = maxOf(System.currentTimeMillis(), existing.updatedAt + 1)
 
         noteDao.updateNote(

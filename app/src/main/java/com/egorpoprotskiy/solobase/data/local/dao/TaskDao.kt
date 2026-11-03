@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.egorpoprotskiy.solobase.data.local.entity.TaskEntity
 import kotlinx.coroutines.flow.Flow
@@ -93,4 +94,21 @@ interface TaskDao {
         taskId: String,
         uploadedUpdatedAt: Long
     )
+
+    // Все задачи для первоначального объединения с Firestore,
+// включая синхронизированные и помеченные удалёнными.
+    @Query("SELECT * FROM tasks")
+    suspend fun getAllTasksForSync(): List<TaskEntity>
+
+    // Применяет облачную задачу, только если она не старее локальной.
+// При одинаковом updatedAt побеждает Firestore.
+    @Transaction
+    suspend fun applySyncedTaskIfNewer(task: TaskEntity) {
+        val localTask = getTaskById(task.id)
+
+        if (localTask == null || task.updatedAt >= localTask.updatedAt) {
+            upsertSyncedTask(task.copy(isSynced = true))
+        }
+    }
 }
+

@@ -33,6 +33,7 @@ class ProjectRepositoryImpl @Inject constructor(
 
     override suspend fun updateProject(project: Project) {
         val existing = projectDao.getProjectById(project.id) ?: return
+        if (existing.deletedAt != null) return
         val now = maxOf(System.currentTimeMillis(), existing.updatedAt + 1)
 
         projectDao.updateProject(
