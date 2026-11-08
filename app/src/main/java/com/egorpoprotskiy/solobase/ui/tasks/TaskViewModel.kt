@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.egorpoprotskiy.solobase.R
+import com.egorpoprotskiy.solobase.data.remote.sync.SyncManager
 import com.egorpoprotskiy.solobase.domain.models.Task
 import com.egorpoprotskiy.solobase.domain.models.TaskStatus
 import com.egorpoprotskiy.solobase.domain.usecase.task.AddTaskUseCase
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.util.Log
 
 @HiltViewModel
 class TaskViewModel
@@ -36,7 +38,8 @@ class TaskViewModel
     private val deleteTaskUseCase: DeleteTaskUseCase,
     private val setTaskCompletedUseCase: SetTaskCompletedUseCase,
     private val updateTaskDetailsUseCase: UpdateTaskDetailsUseCase,
-    private val moveTaskToStatusUseCase: MoveTaskToStatusUseCase
+    private val moveTaskToStatusUseCase: MoveTaskToStatusUseCase,
+    private val syncManager: SyncManager
 ): ViewModel() {
     private val _uiState = MutableStateFlow(TasksUiState())
     val uiState: StateFlow<TasksUiState> = _uiState.asStateFlow()
@@ -120,6 +123,7 @@ class TaskViewModel
         viewModelScope.launch {
             try {
                 setTaskCompletedUseCase(task, isCompleted)
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
@@ -132,6 +136,7 @@ class TaskViewModel
         viewModelScope.launch {
             try {
                 deleteTaskUseCase(taskId)
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
@@ -160,6 +165,7 @@ class TaskViewModel
                     projectId = _uiState.value.selectedProjectId,
                     reminderAt = reminderAt
                 )
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
@@ -171,6 +177,7 @@ class TaskViewModel
         viewModelScope.launch {
             try {
                 updateTaskUseCase(task)
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
@@ -188,6 +195,7 @@ class TaskViewModel
         viewModelScope.launch {
             try {
                 updateTaskDetailsUseCase(task, content, isUrgent, isImportant, reminderAt)
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
@@ -199,6 +207,7 @@ class TaskViewModel
         viewModelScope.launch {
             try {
                 moveTaskToStatusUseCase(task, status)
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
@@ -206,6 +215,11 @@ class TaskViewModel
         }
     }
 
+    private suspend fun syncAfterLocalChange() {
+        syncManager.sync().onFailure { error ->
+            Log.e("TaskViewModel", "Sync failed after local change", error)
+        }
+    }
     private fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }

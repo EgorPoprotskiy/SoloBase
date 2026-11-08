@@ -2,6 +2,7 @@ package com.egorpoprotskiy.solobase.ui.projects
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.egorpoprotskiy.solobase.data.remote.sync.SyncManager
 import com.egorpoprotskiy.solobase.domain.models.Project
 import com.egorpoprotskiy.solobase.domain.usecase.project.AddProjectUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.project.DeleteProjectUseCase
@@ -16,13 +17,15 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.util.Log
 
 @HiltViewModel
 class ProjectViewModel @Inject constructor(
     private val getProjectsUseCase: GetProjectsUseCase,
     private val addProjectUseCase: AddProjectUseCase,
     private val deleteProjectUseCase: DeleteProjectUseCase,
-    private val updateProjectUseCase: UpdateProjectUseCase
+    private val updateProjectUseCase: UpdateProjectUseCase,
+    private val syncManager: SyncManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProjectsUiState())
     val uiState: StateFlow<ProjectsUiState> = _uiState.asStateFlow()
@@ -60,6 +63,7 @@ class ProjectViewModel @Inject constructor(
                     name = name,
                     description = description
                 )
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
@@ -71,6 +75,7 @@ class ProjectViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 deleteProjectUseCase(projectId)
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
@@ -86,13 +91,18 @@ class ProjectViewModel @Inject constructor(
                     name = name,
                     description = description
                 )
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
             }
         }
     }
-
+    private suspend fun syncAfterLocalChange() {
+        syncManager.sync().onFailure { error ->
+            Log.e("ProjectViewModel", "Sync failed after local change", error)
+        }
+    }
     private fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }

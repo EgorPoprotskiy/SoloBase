@@ -2,6 +2,7 @@ package com.egorpoprotskiy.solobase.ui.notes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.egorpoprotskiy.solobase.data.remote.sync.SyncManager
 import com.egorpoprotskiy.solobase.domain.models.Note
 import com.egorpoprotskiy.solobase.domain.usecase.note.AddNoteUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.note.DeleteNoteUseCase
@@ -17,13 +18,15 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import android.util.Log
 
 @HiltViewModel
 class ProjectNotesViewModel @Inject constructor(
     private val getNotesByProjectUseCase: GetNotesByProjectUseCase,
     private val addNoteUseCase: AddNoteUseCase,
     private val updateNoteUseCase: UpdateNoteUseCase,
-    private val deleteNoteUseCase: DeleteNoteUseCase
+    private val deleteNoteUseCase: DeleteNoteUseCase,
+    private val syncManager: SyncManager
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProjectNotesUiState())
     val uiState: StateFlow<ProjectNotesUiState> = _uiState.asStateFlow()
@@ -76,6 +79,7 @@ class ProjectNotesViewModel @Inject constructor(
                     projectId = projectId,
                     content = content
                 )
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
@@ -87,6 +91,7 @@ class ProjectNotesViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 updateNoteUseCase(note, content)
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
@@ -98,6 +103,7 @@ class ProjectNotesViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 deleteNoteUseCase(noteId)
+                syncAfterLocalChange()
                 clearError()
             } catch (exception: Exception) {
                 handleOperationError(exception)
@@ -111,7 +117,11 @@ class ProjectNotesViewModel @Inject constructor(
             notes = searchNotes(allNotes, query)
         )
     }
-
+    private suspend fun syncAfterLocalChange() {
+        syncManager.sync().onFailure { error ->
+            Log.e("ProjectNotesViewModel", "Sync failed after local change", error)
+        }
+    }
     private fun clearError() {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
