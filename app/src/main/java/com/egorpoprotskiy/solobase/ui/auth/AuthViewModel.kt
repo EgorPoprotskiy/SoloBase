@@ -20,6 +20,7 @@ import com.egorpoprotskiy.solobase.domain.models.AuthError
 import com.egorpoprotskiy.solobase.domain.models.AuthException
 import com.egorpoprotskiy.solobase.domain.usecase.auth.ObserveAuthStateUseCase
 import kotlinx.coroutines.flow.update
+import com.egorpoprotskiy.solobase.data.remote.sync.SyncScheduler
 
 /**
  * ViewModel экрана авторизации.
@@ -36,7 +37,8 @@ class AuthViewModel @Inject constructor(
     private val sendPasswordResetEmailUseCase: SendPasswordResetEmailUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val observeAuthStateUseCase: ObserveAuthStateUseCase,
-    private val syncManager: SyncManager
+    private val syncManager: SyncManager,
+    private val syncScheduler: SyncScheduler
 ): ViewModel() {
 //    private val _uiState = MutableStateFlow(AuthUiState(currentUser = getCurrentUserUseCase()))
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -52,6 +54,9 @@ class AuthViewModel @Inject constructor(
                     )
                 }
                 if (user != null) {
+                    // Запускаем периодическую синхронизацию.
+                    syncScheduler.scheduleSync()
+                    //Выполняем первоначальную синхронизацию
                     syncManager.sync()
                         .onFailure { error ->
                             Log.e("AuthViewModel", "Initial sync failed", error)
@@ -132,6 +137,8 @@ class AuthViewModel @Inject constructor(
     }
     // Выполняет выход из текущего аккаунта.
     private fun logout() {
+        // Отменяем периодическую синхронизацию
+        syncScheduler.cancelSync()
         logoutUseCase()
         _uiState.value = _uiState.value.copy(
             currentUser = null,
