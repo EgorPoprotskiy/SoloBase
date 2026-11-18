@@ -31,10 +31,11 @@ object DatabaseModule {
         )
             .addMigrations(
                 MIGRATION_3_4,
+                MIGRATION_4_5,
                 MIGRATION_5_6,
                 MIGRATION_6_7
             )
-            .fallbackToDestructiveMigration(dropAllTables = true)
+//            .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
     }
     @Provides
@@ -65,6 +66,125 @@ object DatabaseModule {
             db.execSQL("ALTER TABLE tasks ADD COLUMN reminderAt INTEGER")
         }
     }
+
+    private val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+
+            // TASKS
+            db.execSQL(
+                """
+                CREATE TABLE tasks_new (
+                    id TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    category TEXT NOT NULL,
+                    status TEXT NOT NULL,
+                    isUrgent INTEGER NOT NULL,
+                    isImportant INTEGER NOT NULL,
+                    timestamp INTEGER,
+                    reminderAt INTEGER,
+                    position INTEGER NOT NULL,
+                    tagId TEXT,
+                    isCompleted INTEGER NOT NULL,
+                    projectId TEXT,
+                    updatedAt INTEGER NOT NULL,
+                    deletedAt INTEGER,
+                    PRIMARY KEY(id)
+                )
+                """.trimIndent()
+            )
+
+            db.execSQL(
+                """
+                INSERT INTO tasks_new (
+                    id, content, category, status,
+                    isUrgent, isImportant, timestamp,
+                    reminderAt, position, tagId,
+                    isCompleted, projectId,
+                    updatedAt, deletedAt
+                )
+                SELECT
+                    id, content, category, status,
+                    isUrgent, isImportant, timestamp,
+                    reminderAt, position, tagId,
+                    isCompleted, projectId,
+                    COALESCE(timestamp, 0), NULL
+                FROM tasks
+                """.trimIndent()
+            )
+
+            db.execSQL("DROP TABLE tasks")
+            db.execSQL("ALTER TABLE tasks_new RENAME TO tasks")
+
+
+            // PROJECTS
+            db.execSQL(
+                """
+                CREATE TABLE projects_new (
+                    id TEXT NOT NULL,
+                    name TEXT NOT NULL,
+                    description TEXT NOT NULL,
+                    colorHex TEXT NOT NULL,
+                    createdAt INTEGER NOT NULL,
+                    updatedAt INTEGER NOT NULL,
+                    deletedAt INTEGER,
+                    PRIMARY KEY(id)
+                )
+                """.trimIndent()
+            )
+
+            db.execSQL(
+                """
+                INSERT INTO projects_new (
+                    id, name, description, colorHex,
+                    createdAt, updatedAt, deletedAt
+                )
+                SELECT
+                    id, name, description, colorHex,
+                    createdAt, createdAt, NULL
+                FROM projects
+                """.trimIndent()
+            )
+
+            db.execSQL("DROP TABLE projects")
+            db.execSQL("ALTER TABLE projects_new RENAME TO projects")
+
+
+            // NOTES
+            db.execSQL(
+                """
+                CREATE TABLE notes_new (
+                    id TEXT NOT NULL,
+                    projectId TEXT NOT NULL,
+                    content TEXT NOT NULL,
+                    timestamp INTEGER NOT NULL,
+                    colorHex TEXT,
+                    updatedAt INTEGER NOT NULL,
+                    deletedAt INTEGER,
+                    PRIMARY KEY(id)
+                )
+                """.trimIndent()
+            )
+
+            db.execSQL(
+                """
+                INSERT INTO notes_new (
+                    id, projectId, content,
+                    timestamp, colorHex,
+                    updatedAt, deletedAt
+                )
+                SELECT
+                    id, projectId, content,
+                    timestamp, colorHex,
+                    timestamp, NULL
+                FROM notes
+                """.trimIndent()
+            )
+
+            db.execSQL("DROP TABLE notes")
+            db.execSQL("ALTER TABLE notes_new RENAME TO notes")
+        }
+    }
+
     private val MIGRATION_5_6 = object : Migration(5, 6) {
         override fun migrate(db: SupportSQLiteDatabase) {
             db.execSQL(
