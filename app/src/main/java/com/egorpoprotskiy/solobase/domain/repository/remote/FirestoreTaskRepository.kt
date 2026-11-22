@@ -15,10 +15,8 @@ interface FirestoreTaskRepository {
     fun observeTasks(): Flow<List<Task>>
 
     // Создаёт новую задачу или обновляет существующую.
-//    suspend fun saveTask(task: Task): Result<Unit>
-    suspend fun saveTask(task: Task): Result<FirestoreSyncResult<Task>>
+    suspend fun saveTask(task: Task, uid: String): Result<FirestoreSyncResult<Task>>
     // Помечает задачу удалённой, сохраняя её документ для синхронизации.
     suspend fun deleteTask(taskId: String): Result<Unit>
-
-    suspend fun getAllTasksFromServer(): Result<List<Task>>
+    suspend fun getAllTasksFromServer(uid: String): Result<List<Task>>
 }

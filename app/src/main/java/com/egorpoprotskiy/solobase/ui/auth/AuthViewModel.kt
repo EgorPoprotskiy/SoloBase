@@ -1,11 +1,9 @@
 package com.egorpoprotskiy.solobase.ui.auth
 
 import android.util.Log
-import androidx.compose.runtime.currentComposer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.egorpoprotskiy.solobase.data.remote.sync.SyncManager
-import com.egorpoprotskiy.solobase.domain.usecase.auth.GetCurrentUserUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.auth.LoginUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.auth.LogoutUseCase
 import com.egorpoprotskiy.solobase.domain.usecase.auth.RegisterUseCase
@@ -20,6 +18,7 @@ import com.egorpoprotskiy.solobase.domain.models.AuthError
 import com.egorpoprotskiy.solobase.domain.models.AuthException
 import com.egorpoprotskiy.solobase.domain.usecase.auth.ObserveAuthStateUseCase
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CancellationException
 import com.egorpoprotskiy.solobase.data.remote.sync.SyncScheduler
 
 /**
@@ -35,12 +34,10 @@ class AuthViewModel @Inject constructor(
     private val registerUseCase: RegisterUseCase,
     private val logoutUseCase: LogoutUseCase,
     private val sendPasswordResetEmailUseCase: SendPasswordResetEmailUseCase,
-    private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val observeAuthStateUseCase: ObserveAuthStateUseCase,
     private val syncManager: SyncManager,
     private val syncScheduler: SyncScheduler
 ): ViewModel() {
-//    private val _uiState = MutableStateFlow(AuthUiState(currentUser = getCurrentUserUseCase()))
     private val _uiState = MutableStateFlow(AuthUiState())
     //Публичное состояние, доступное Compose UI только для чтения.
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
@@ -54,13 +51,23 @@ class AuthViewModel @Inject constructor(
                     )
                 }
                 if (user != null) {
-                    // Запускаем периодическую синхронизацию.
+                    // Сначала разрешаем синхронизацию после подтверждённой авторизации.
+                    syncManager.resumeSync()
                     syncScheduler.scheduleSync()
-                    //Выполняем первоначальную синхронизацию
-                    syncManager.sync()
-                        .onFailure { error ->
-                            Log.e("AuthViewModel", "Initial sync failed", error)
-                        }
+
+                    // Не блокируем сбор auth-state: logout должен обрабатываться немедленно.
+                    viewModelScope.launch {
+                        syncManager.sync()
+                            .onFailure { error ->
+                                if (error !is CancellationException) {
+                                    Log.e("AuthViewModel", "Initial sync failed", error)
+                                }
+                            }
+                    }
+                } else {
+                    // При старте без сессии и при logout синхронизация должна быть выключена.
+                    syncManager.cancelActiveSync()
+                    syncScheduler.cancelSync()
                 }
             }
         }
@@ -137,13 +144,16 @@ class AuthViewModel @Inject constructor(
     }
     // Выполняет выход из текущего аккаунта.
     private fun logout() {
-        // Отменяем периодическую синхронизацию
+        // Сначала останавливаем активную и запланированную синхронизацию, затем завершаем сессию.
+        syncManager.cancelActiveSync()
         syncScheduler.cancelSync()
         logoutUseCase()
-        _uiState.value = _uiState.value.copy(
-            currentUser = null,
-            errorMessage = null
-        )
+        _uiState.update {
+            it.copy(
+                currentUser = null,
+                errorMessage = null
+            )
+        }
     }
     // Отправляет email для сброса пароля.
     private fun sendPasswordResetEmail(email: String) {

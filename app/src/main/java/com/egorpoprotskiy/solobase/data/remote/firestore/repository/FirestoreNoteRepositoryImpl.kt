@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -64,11 +65,10 @@ class FirestoreNoteRepositoryImpl @Inject constructor(
     }
 
     override suspend fun saveNote(
-        note: Note
+        note: Note,
+        uid: String
     ): Result<FirestoreSyncResult<Note>> {
         return try {
-            val uid = auth.currentUser?.uid
-                ?: throw IllegalStateException("User is not authenticated")
 
             val documentRef = firestore
                 .collection(USERS_COLLECTION)
@@ -96,6 +96,8 @@ class FirestoreNoteRepositoryImpl @Inject constructor(
             }.await()
 
             Result.success(result)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -124,14 +126,14 @@ class FirestoreNoteRepositoryImpl @Inject constructor(
             .await()
 
         Result.success(Unit)
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Exception) {
         Result.failure(e)
     }
 
-    override suspend fun getAllNotesFromServer(): Result<List<Note>> {
+    override suspend fun getAllNotesFromServer(uid: String): Result<List<Note>> {
         return try {
-            val uid = auth.currentUser?.uid
-                ?: throw IllegalStateException("User is not authenticated")
             // Получаем актуальные данные непосредственно с сервера Firestore.
             val snapshot = firestore
                 .collection(USERS_COLLECTION)
@@ -147,6 +149,8 @@ class FirestoreNoteRepositoryImpl @Inject constructor(
             }
 
             Result.success(items)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }

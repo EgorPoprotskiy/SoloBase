@@ -22,12 +22,10 @@ interface FirestoreNoteRepository {
     /**
      * Сохраняет заметку в облаке или обновляет существующую.
      */
-//    suspend fun saveNote(note: Note): Result<Unit>
-    suspend fun saveNote(note: Note): Result<FirestoreSyncResult<Note>>
+    suspend fun saveNote(note: Note, uid: String): Result<FirestoreSyncResult<Note>>
     /**
      * Помечает заметку как удалённую, сохраняя её документ в Firestore.
      */
     suspend fun deleteNote(noteId: String): Result<Unit>
-
-    suspend fun getAllNotesFromServer(): Result<List<Note>>
+    suspend fun getAllNotesFromServer(uid: String): Result<List<Note>>
 }

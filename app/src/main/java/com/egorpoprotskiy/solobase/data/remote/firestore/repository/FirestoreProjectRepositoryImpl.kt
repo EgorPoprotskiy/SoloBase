@@ -7,6 +7,7 @@ import com.egorpoprotskiy.solobase.domain.repository.remote.FirestoreProjectRepo
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -74,11 +75,10 @@ class FirestoreProjectRepositoryImpl @Inject constructor (
      * В качестве идентификатора документа Firestore используется существующий project.id.
      */
     override suspend fun saveProject(
-        project: Project
+        project: Project,
+        uid: String
     ): Result<FirestoreSyncResult<Project>> {
         return try {
-            val uid = auth.currentUser?.uid
-                ?: throw IllegalStateException("User is not authenticated")
 
             val documentRef = firestore
                 .collection(USERS_COLLECTION)
@@ -106,6 +106,8 @@ class FirestoreProjectRepositoryImpl @Inject constructor (
             }.await()
 
             Result.success(result)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -138,14 +140,14 @@ class FirestoreProjectRepositoryImpl @Inject constructor (
                 .await()
 
             Result.success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-    override suspend fun getAllProjectsFromServer(): Result<List<Project>> {
+    override suspend fun getAllProjectsFromServer(uid: String): Result<List<Project>> {
         return try {
-            val uid = auth.currentUser?.uid
-                ?: throw IllegalStateException("User is not authenticated")
             // Получаем актуальные данные непосредственно с сервера Firestore.
             val snapshot = firestore
                 .collection(USERS_COLLECTION)
@@ -161,6 +163,8 @@ class FirestoreProjectRepositoryImpl @Inject constructor (
             }
 
             Result.success(items)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -20,8 +20,13 @@ class SyncWorker @AssistedInject constructor(
                 onSuccess = {
                     Result.success()
                 },
-                onFailure = {
-                    Result.retry()
+                onFailure = { error ->
+                    if (error is CancellationException) {
+                        // Менеджер остановил синхронизацию (например, при logout).
+                        Result.success()
+                    } else {
+                        Result.retry()
+                    }
                 }
             )
         } catch (e: CancellationException) {

@@ -7,10 +7,7 @@ import kotlinx.coroutines.flow.Flow
 interface FirestoreProjectRepository {
 
     fun observeProjects(): Flow<List<Project>>
-
-//    suspend fun saveProject(project: Project): Result<Unit>
-suspend fun saveProject(project: Project): Result<FirestoreSyncResult<Project>>
+    suspend fun saveProject(project: Project, uid: String): Result<FirestoreSyncResult<Project>>
     suspend fun deleteProject(projectId: String): Result<Unit>
-
-    suspend fun getAllProjectsFromServer(): Result<List<Project>>
+    suspend fun getAllProjectsFromServer(uid: String): Result<List<Project>>
 }
