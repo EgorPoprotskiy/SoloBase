@@ -1,4 +1,3 @@
-
 package com.egorpoprotskiy.solobase.data.remote.sync
 
 import com.egorpoprotskiy.solobase.data.local.dao.NoteDao
@@ -20,6 +19,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Singleton
+import android.util.Log
 
 @Singleton
 class SyncManager @Inject constructor(
@@ -94,13 +94,36 @@ class SyncManager @Inject constructor(
     ) {
         val remoteMap = remoteTasks.associateBy { it.id }
 
+        Log.d(
+            "SoloBaseSync",
+            "========== TASK SYNC START: local=${localTasks.size}, remote=${remoteTasks.size} =========="
+        )
+
         for (local in localTasks) {
             val remote = remoteMap[local.id]
+
+            val decision = when {
+                remote == null -> "UPLOAD_LOCAL_REMOTE_MISSING"
+                local.updatedAt > remote.updatedAt -> "UPLOAD_LOCAL_NEWER"
+                else -> "APPLY_REMOTE"
+            }
+
+            Log.d(
+                "SoloBaseSync",
+                "Task ${local.id}: " +
+                        "LOCAL completed=${local.isCompleted}, updatedAt=${local.updatedAt}, synced=${local.isSynced}; " +
+                        "REMOTE completed=${remote?.isCompleted}, updatedAt=${remote?.updatedAt}; " +
+                        "DECISION=$decision"
+            )
 
             if (remote == null || local.updatedAt > remote.updatedAt) {
                 uploadTask(local)
             } else {
                 taskDao.applySyncedTaskIfNewer(remote.toEntity())
+                Log.d(
+                    "SoloBaseSync",
+                    "Task ${local.id}: remote version applied to Room"
+                )
             }
         }
 
@@ -109,24 +132,50 @@ class SyncManager @Inject constructor(
 
         for (remote in remoteTasks) {
             if (remote.id !in localIds) {
+                Log.d(
+                    "SoloBaseSync",
+                    "Task ${remote.id}: only in Firestore; " +
+                            "completed=${remote.isCompleted}, updatedAt=${remote.updatedAt}"
+                )
+
                 taskDao.applySyncedTaskIfNewer(remote.toEntity())
             }
         }
+
+        Log.d("SoloBaseSync", "========== TASK SYNC FINISHED ==========")
     }
 
     private suspend fun uploadTask(
         task: com.egorpoprotskiy.solobase.data.local.entity.TaskEntity
     ) {
+        Log.d(
+            "SoloBaseSync",
+            "Task ${task.id}: uploading LOCAL " +
+                    "completed=${task.isCompleted}, updatedAt=${task.updatedAt}"
+        )
+
         when (
             val result = firestoreTaskRepository
                 .saveTask(task.toDomain())
                 .getOrThrow()
         ) {
             FirestoreSyncResult.Uploaded -> {
+                Log.d(
+                    "SoloBaseSync",
+                    "Task ${task.id}: UPLOAD SUCCESS"
+                )
+
                 taskDao.markTaskSynced(task.id, task.updatedAt)
             }
 
             is FirestoreSyncResult.RemoteNewer -> {
+                Log.d(
+                    "SoloBaseSync",
+                    "Task ${task.id}: FIRESTORE VERSION WON " +
+                            "completed=${result.remote.isCompleted}, " +
+                            "updatedAt=${result.remote.updatedAt}"
+                )
+
                 taskDao.applySyncedTaskIfNewer(result.remote.toEntity())
             }
         }
